@@ -16,6 +16,11 @@ class Plugin
         return $this->name;
     }
 
+    public function contentFilter($content)
+    {
+        return $content;
+    }
+
     public function templateParamFilter($params)
     {
         return $params;

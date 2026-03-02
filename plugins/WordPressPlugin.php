@@ -32,9 +32,8 @@ class WordPressPlugin extends Plugin
         // Remove stupid captions
         if (preg_match_all('#(\[caption\b[^\]]*\](.*)\[\/caption])#iU', $content->html, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $key => $match) {
-                // rewrite this, likely errors
                 $replace = str_replace('</a>', '</a><span class="caption text-center fst-italic">', $match[ 2 ] . '</span>');
-                $replace = str_replace('/>', '/><span class="caption text-center fst-italic">', $match[ 2 ] . '</span>');
+                $replace = str_replace('/>', '/><span class="caption text-center fst-italic">', $replace);
                 $content->html = str_replace($match[ 0 ], $replace, $content->html);
             }
         }
@@ -42,7 +41,6 @@ class WordPressPlugin extends Plugin
         // fix stray image closings
         if (preg_match_all('#<img(.*)/>#iU', $content->html, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $key => $match) {
-                // rewrite this, likely errors
                 $fixed_image = str_replace([ ' />', '/>' ], [ '>', '>' ], $match[ 0 ]);
                 $content->html = str_replace($match[ 0 ], $fixed_image, $content->html);
             }

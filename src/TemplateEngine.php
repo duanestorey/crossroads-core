@@ -59,8 +59,11 @@ class TemplateEngine
 
     public function render($templateFile, $params)
     {
-        if ($this->latte) {
-            return $this->latte->renderToString($templateFile . '.latte', $params);
+        if (!$this->latte) {
+            LOG('Template engine not initialized', 1, Log::ERROR);
+            return '';
         }
+
+        return $this->latte->renderToString($templateFile . '.latte', $params);
     }
 }

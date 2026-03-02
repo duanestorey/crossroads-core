@@ -148,8 +148,8 @@ class Theme
         }
 
         foreach ($this->themeConfig->get('theme.images', []) as $imageFile) {
-            if (file_exists($this->coreThemeDir . '/assets/' . $imageFile)) {
-                Utils::copyFile($this->coreThemeDir . '/assets/' . $imageFile, CROSSROADS_PUBLIC_DIR . '/assets/' . pathinfo($imageFile, PATHINFO_BASENAME));
+            if (file_exists($this->primaryThemeDir . '/assets/' . $imageFile)) {
+                Utils::copyFile($this->primaryThemeDir . '/assets/' . $imageFile, CROSSROADS_PUBLIC_DIR . '/assets/' . pathinfo($imageFile, PATHINFO_BASENAME));
                 LOG(sprintf(_i18n('core.class.theme.copying'), $imageFile, CROSSROADS_PUBLIC_DIR . '/assets/' . pathinfo($imageFile, PATHINFO_BASENAME)), 3, Log::DEBUG);
             }
         }

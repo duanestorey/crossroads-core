@@ -16,6 +16,14 @@ class LogListenerFile extends LogListener
         $this->startTime = microtime(true);
     }
 
+    public function __destruct()
+    {
+        if ($this->fileHandle) {
+            fclose($this->fileHandle);
+            $this->fileHandle = null;
+        }
+    }
+
     public function setLevel($level)
     {
         $this->currentLevel = $level;

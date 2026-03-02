@@ -22,7 +22,7 @@ class Menu
         if (file_exists($localFile)) {
             $localData = YAML::parse_file($localFile);
             if ($localData) {
-                $this->menuData = $localData;
+                $this->menuData = array_merge($this->menuData ?: [], $localData);
             }
         }
     }

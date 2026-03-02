@@ -116,6 +116,6 @@ class DB
 
     public function getAllTerms()
     {
-        return $this->sql->query('SELECT * FROM content');
+        return $this->sql->query('SELECT * FROM taxonomy');
     }
 }

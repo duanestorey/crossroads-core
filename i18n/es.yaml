@@ -2,7 +2,7 @@ core:
   app:
     starting: "%s %s se está iniciando"
     exec_plugin: "Executing plugin [%s]"
-    exec_command: "Executing command [%s]"
+    exec_command: "Ejecutando comando [%s] en [%s] a las [%s]"
     finished: "Finished executing [%s] command, total time taken %0.3fs"
     exception: "Build stopped to due exception [%s] with message [%s]"
   build:

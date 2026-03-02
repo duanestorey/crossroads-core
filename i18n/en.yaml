@@ -64,7 +64,7 @@ core:
   new:
     content: "Creating new [%s]"
     title: "Enter new title: "
-    unknown: "Unknown conetnt type [%s]"
+    unknown: "Unknown content type [%s]"
     created: "Created new [%s], markdown file is: %s"
     start: "Create something beautiful today."
   init:
@@ -115,7 +115,7 @@ plugins:
     corrupt: "Corrupted image file [%s] in [%s]"
 errors:
   no_command: "No method exists for command [%s]"
-  arg_not_understood: "Argument not understoof [%s]"
+  arg_not_understood: "Argument not understood [%s]"
 seo:
   home: "%s - %s"
   home_paged: "Page %d of %d - %s"

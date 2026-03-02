@@ -443,8 +443,9 @@ class Engine
             if (file_exists(CROSSROADS_SRC_DIR . '/importers/' . $importer . '.php')) {
                 require_once(CROSSROADS_SRC_DIR . '/importers/' . $importer . '.php');
 
-                $importer = new Importers\WordPress();
-                $importer->import(Utils::fixPath($url));
+                $className = 'CR\\Importers\\' . ucfirst($importer);
+                $importerObj = new $className();
+                $importerObj->import(Utils::fixPath($url));
             } else {
                 LOG(sprintf(_i18n('core.import.unknown'), $importer), 1, Log::ERROR);
             }

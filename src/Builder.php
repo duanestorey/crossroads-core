@@ -252,7 +252,14 @@ class Builder
                 }
 
                 $mdUrl = $entry->url . '.md';
-                $desc = $entry->description ? ': ' . $entry->description : '';
+                $desc = '';
+                if ($entry->description) {
+                    $descText = trim(preg_replace('/\s+/', ' ', $entry->description));
+                    if (mb_strlen($descText) > 200) {
+                        $descText = mb_substr($descText, 0, 200) . '...';
+                    }
+                    $desc = ': ' . $descText;
+                }
                 $llms .= '- [' . $entry->title . '](' . $mdUrl . ')' . $desc . "\n";
 
                 $count++;
@@ -265,13 +272,6 @@ class Builder
         file_put_contents(CROSSROADS_PUBLIC_DIR . '/llms.txt', $llms);
 
         LOG(sprintf(_i18n('core.build.writing'), 'llms.txt'), 1, Log::INFO);
-    }
-
-    public function _write404Page()
-    {
-        $this->renderer->render404Page();
-
-        LOG(sprintf(_i18n('core.build.writing'), '404.html'), 1, Log::INFO);
     }
 
     private function _setupMenus()

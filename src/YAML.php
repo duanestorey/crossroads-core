@@ -11,7 +11,7 @@ class YAML
         try {
             $value = \Symfony\Component\Yaml\Yaml::parseFile($path_to_file);
         } catch (\Symfony\Component\Yaml\Exception\ParseException $exception) {
-            // do something here
+            LOG('YAML parse error: ' . $exception->getMessage(), 1, Log::ERROR);
         }
 
         if ($flatten) {
@@ -53,7 +53,7 @@ class YAML
         try {
             $value = \Symfony\Component\Yaml\Yaml::parse($data);
         } catch (\Symfony\Component\Yaml\Exception\ParseException $exception) {
-            // do something here
+            LOG('YAML parse error: ' . $exception->getMessage(), 1, Log::ERROR);
         }
 
         return $value;

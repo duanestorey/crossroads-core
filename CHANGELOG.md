@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-03-02
+
+### Fixed
+- `DB::getAllTerms()` queried `content` table instead of `taxonomy` table
+- `Theme::processAssets()` used wrong directory (`coreThemeDir` instead of `primaryThemeDir`) when copying theme images
+- `Config::get()` called `debug_backtrace()` twice on every cache miss
+- `YAML::parse_file()` and `YAML::parse()` silently swallowed parse errors (now logged via `LOG()`)
+- `TemplateEngine::render()` returned `null` when Latte engine uninitialized (now returns empty string with error log)
+- `Engine::_import()` hardcoded WordPress importer class instead of using dynamic class name from CLI argument
+- `Menu::loadMenus()` replaced base menu data with local overrides instead of merging them
+- `WordPressPlugin::contentFilter()` discarded first `str_replace` result in caption replacement chain
+- `LogListenerFile` leaked file handles (added `__destruct()` to close handle)
+- `en.yaml` typos: "conetnt" → "content", "understoof" → "understood"
+- `es.yaml` `exec_command` string had 1 format placeholder instead of 3 (matching `en.yaml`)
+- `Builder::_writeLlmsTxt()` multi-line descriptions broke llms.txt list item format (now collapsed to single line, truncated at 200 chars)
+
+### Added
+- Default `contentFilter()` passthrough on base `Plugin` class (prevents fatal error when `PluginManager::contentFilter()` is called on plugins without override)
+
+### Removed
+- Dead `WebServer` class (`src/WebServer.php`) — superseded by `DevServer`
+- Dead `Builder::_write404Page()` method — called non-existent `Renderer::render404Page()`
+
 ## [1.4.0] - 2026-03-02
 
 ### Added
