@@ -7,3 +7,4 @@ theme:
       - phosphor.scss
     phosphor.min.js:
       - phosphor.js
+  images: []

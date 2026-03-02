@@ -24,9 +24,6 @@ class DevServer
 
     public function start()
     {
-        // Always include drafts in serve mode
-        $this->config->set('options.include_drafts', true);
-
         // Initial build
         LOG(_i18n('core.build.starting'), 0, Log::INFO);
         $this->_runBuild();

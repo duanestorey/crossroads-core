@@ -59,6 +59,9 @@ class Renderer
             }
 
             if ($entry->isDraft) {
+                $meta = '<meta name="crossroads-draft" content="true">';
+                $renderedHtml = preg_replace('/(<head[^>]*>)/i', '$1' . $meta, $renderedHtml, 1);
+
                 $banner = '<div style="position:fixed;top:0;left:0;right:0;z-index:99999;'
                     . 'background:#f59e0b;color:#000;text-align:center;padding:8px 16px;'
                     . 'font-family:system-ui,sans-serif;font-size:14px;font-weight:600;">'

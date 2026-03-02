@@ -414,7 +414,6 @@ class Engine
 
         echo _i18n('core.usage.proper') . "\n\n";
         echo sprintf($spacing, 'php crossroads build') . _i18n('core.usage.build') . "\n";
-        echo sprintf($spacing, 'php crossroads build --drafts') . _i18n('core.usage.build_drafts') . "\n";
         echo sprintf($spacing, 'php crossroads clean') . _i18n('core.usage.clean') . "\n";
         echo sprintf($spacing, 'php crossroads create plugin') . _i18n('core.usage.create.plugin') . "\n";
         echo sprintf($spacing, 'php crossroads create theme') . _i18n('core.usage.create.theme') . "\n";
@@ -475,11 +474,6 @@ class Engine
 
     private function _build($argc, $argv)
     {
-        if ($this->_hasFlag('drafts')) {
-            $this->config->set('options.include_drafts', true);
-            LOG(_i18n('core.build.drafts_enabled'), 1, Log::INFO);
-        }
-
         LOG(_i18n('core.build.starting'));
 
         $this->builder = new Builder($this->config, $this->pluginManager, $this->db);
