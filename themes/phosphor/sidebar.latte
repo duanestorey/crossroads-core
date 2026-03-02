@@ -13,10 +13,14 @@
                         </ul>
                     </div>
 
+                    {if count($site->social)}
                     <div class="sidebar-section">
                         <div class="sidebar-heading">// elsewhere</div>
                         <ul class="sidebar-nav">
-                            <li><a href="https://github.com/duanestorey">github</a></li>
+                            {foreach $site->social as $name => $url}
+                            <li><a href="{$url}">{$name}</a></li>
+                            {/foreach}
                         </ul>
                     </div>
+                    {/if}
                 </aside>
