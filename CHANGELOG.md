@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-03-02
+
+### Added
+- `og:site_name`, `og:locale`, `twitter:site`, `<meta name="author">` tags on single pages
+- `og:title` and `og:url` tags on index/taxonomy/home pages
+- JSON-LD structured data (`BlogPosting` for posts, `WebSite` for home page)
+- `<meta name="robots" content="noindex, follow">` on paginated pages (page 2+)
+- Optional `noai, noimageai` robots directive via `options.noai` config
+
+### Changed
+- Centralize all SEO meta tag generation in SeoPlugin (removed from theme headers)
+- `twitter:card` uses `summary` when no featured image, `summary_large_image` when present
+- Generator meta tag now reads `Crossroads SSG` consistently across all themes
+
+### Fixed
+- `og:description` used `name=` instead of `property=` attribute in lumen and simple themes
+- `twitter:creator` was hardcoded instead of reading from `site.social` config
+- `og:type` was always `article` even on home and taxonomy pages
+- `og:locale` now uses proper `language_TERRITORY` format (e.g. `en_US`)
+- `templateParamFilter` was not called for index pages
+- `templateParamFilter` ran before `isSingle` and `page->title` were set in single page rendering
+
 ## [1.3.0] - 2026-03-02
 
 ### Added

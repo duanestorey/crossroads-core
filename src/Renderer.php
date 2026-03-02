@@ -45,10 +45,11 @@ class Renderer
         // set up page specific stuff like the page titel
         $params = $this->_getDefaultRenderParams($entry->relUrl, [ $entry->contentType, $entry->contentType . '-' . $entry->className ]);
         $params->content = $entry;
-        $params = $this->pluginManager->templateParamFilter($params);
 
         $params->page->title = sprintf('%s - %s', $entry->title, $this->config->get('site.name'));
         $params->isSingle = true;
+
+        $params = $this->pluginManager->templateParamFilter($params);
 
         $templateName = $this->templateEngine->locateTemplate($templateFiles);
         if ($templateName) {
@@ -167,6 +168,8 @@ class Renderer
 
                 $params->isHome = $is_home;
                 $params->pagination = $pagination;
+
+                $params = $this->pluginManager->templateParamFilter($params);
 
                 $renderedHtml = $this->templateEngine->render($templateName, $params);
 
