@@ -179,7 +179,59 @@ class Engine
         LOG(_i18n('core.init.version'), 1, Log::INFO);
         file_put_contents(CROSSROADS_BASE_DIR . '/.crossroadsinit', CROSSROADS_VERSION);
 
+        // Scaffold sample content if _content/ directories are empty or missing
+        $this->_scaffoldSampleContent();
+
         LOG(_i18n('core.init.done'), 0, Log::INFO);
+    }
+
+    private function _scaffoldSampleContent()
+    {
+        $dirs = [
+            CROSSROADS_CONTENT_DIR . '/posts',
+            CROSSROADS_CONTENT_DIR . '/posts/_images',
+            CROSSROADS_CONTENT_DIR . '/pages',
+            CROSSROADS_CONTENT_DIR . '/pages/_images',
+        ];
+
+        foreach ($dirs as $dir) {
+            if (!is_dir($dir)) {
+                Utils::mkdir($dir);
+                LOG(sprintf('Created directory [%s]', $dir), 1, Log::INFO);
+            }
+        }
+
+        // Sample post
+        $samplePost = CROSSROADS_CONTENT_DIR . '/posts/' . date('Y-m-d') . '-my-new-static-generated-website.md';
+        if (!file_exists($samplePost)) {
+            $postContent = "---\n";
+            $postContent .= "title: \"My New Static Generated Website\"\n";
+            $postContent .= 'date: "' . date('Y-m-d') . "\"\n";
+            $postContent .= "description: \"This is my first post on my new shiny static site generator\"\n";
+            $postContent .= "categories:\n";
+            $postContent .= "  - \"website\"\n";
+            $postContent .= "tags:\n";
+            $postContent .= "  - \"crossroads\"\n";
+            $postContent .= "---\n\n";
+            $postContent .= "This is my first post\n";
+
+            file_put_contents($samplePost, $postContent);
+            LOG(sprintf('Created sample post [%s]', $samplePost), 1, Log::INFO);
+        }
+
+        // Sample about page
+        $samplePage = CROSSROADS_CONTENT_DIR . '/pages/about.md';
+        if (!file_exists($samplePage)) {
+            $pageContent = "---\n";
+            $pageContent .= "title: \"About\"\n";
+            $pageContent .= 'date: "' . date('Y-m-d') . "\"\n";
+            $pageContent .= "description: \"Learn more about this website\"\n";
+            $pageContent .= "---\n\n";
+            $pageContent .= "This is the about page for my new website.\n";
+
+            file_put_contents($samplePage, $pageContent);
+            LOG(sprintf('Created sample page [%s]', $samplePage), 1, Log::INFO);
+        }
     }
 
     private function _stats($argc, $argv)
@@ -314,7 +366,17 @@ class Engine
 
     private function _loadConfig()
     {
-        $this->config = new Config(YAML::parse_file(CROSSROADS_CONFIG_DIR . '/site.yaml', true));
+        $base = YAML::parse_file(CROSSROADS_CONFIG_DIR . '/site.yaml', true);
+
+        $localFile = CROSSROADS_CONFIG_DIR . '/site.local.yaml';
+        if (file_exists($localFile)) {
+            $local = YAML::parse_file($localFile, true);
+            if ($local) {
+                $base = array_merge($base ?: [], $local);
+            }
+        }
+
+        $this->config = new Config($base);
     }
 
     private function _checkConfig()

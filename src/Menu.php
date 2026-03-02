@@ -17,6 +17,14 @@ class Menu
         if (file_exists($this->menuFile)) {
             $this->menuData = YAML::parse_file($this->menuFile);
         }
+
+        $localFile = \CROSSROADS_CONFIG_DIR . '/menus.local.yaml';
+        if (file_exists($localFile)) {
+            $localData = YAML::parse_file($localFile);
+            if ($localData) {
+                $this->menuData = $localData;
+            }
+        }
     }
 
     public function isAvailable($menuName)
