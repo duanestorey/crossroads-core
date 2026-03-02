@@ -161,6 +161,7 @@ class Builder
 
         $this->_writeRobots();
         $this->_writeSitemapXml();
+        $this->_writeLlmsTxt();
 
         LOG(sprintf(_i18n('core.build.total'), $this->entries->getEntryCount(), $this->totalPages), 0, Log::INFO);
 
@@ -220,10 +221,50 @@ class Builder
     private function _writeRobots()
     {
         // write robots
-        $robots = "user-agent: *\ndisallow: /assets/css/\ndisallow: /assets/js/\nallow: /\n\nUser-agent: Twitterbot\nallow: /\nSitemap: " . $this->config->get('site.url') . '/sitemap.xml';
+        $robots = "user-agent: *\ndisallow: /assets/css/\ndisallow: /assets/js/\nallow: /\n\nUser-agent: Twitterbot\nallow: /\nSitemap: " . $this->config->get('site.url') . "/sitemap.xml\nLLMsTxt: " . $this->config->get('site.url') . '/llms.txt';
         file_put_contents(CROSSROADS_PUBLIC_DIR . '/robots.txt', $robots);
 
         LOG(sprintf(_i18n('core.build.writing'), 'robots.txt'), 1, Log::INFO);
+    }
+
+    private function _writeLlmsTxt()
+    {
+        $siteUrl = $this->config->get('site.url');
+        $llms = '# ' . $this->config->get('site.name') . "\n\n";
+        $llms .= '> ' . $this->config->get('site.description', '') . "\n";
+
+        foreach ($this->config->get('content', []) as $contentType => $contentConfig) {
+            $entries = $this->entries->get($contentType);
+            if (!count($entries)) {
+                continue;
+            }
+
+            usort($entries, 'CR\cr_sort');
+
+            $llms .= "\n## " . ucwords($contentType) . "\n\n";
+
+            $limit = ($contentType === $this->config->get('site.home')) ? 50 : 0;
+            $count = 0;
+
+            foreach ($entries as $entry) {
+                if ($entry->isDraft) {
+                    continue;
+                }
+
+                $mdUrl = $entry->url . '.md';
+                $desc = $entry->description ? ': ' . $entry->description : '';
+                $llms .= '- [' . $entry->title . '](' . $mdUrl . ')' . $desc . "\n";
+
+                $count++;
+                if ($limit > 0 && $count >= $limit) {
+                    break;
+                }
+            }
+        }
+
+        file_put_contents(CROSSROADS_PUBLIC_DIR . '/llms.txt', $llms);
+
+        LOG(sprintf(_i18n('core.build.writing'), 'llms.txt'), 1, Log::INFO);
     }
 
     public function _write404Page()

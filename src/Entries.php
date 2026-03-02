@@ -100,6 +100,7 @@ class Entries
                 $content->modifiedDate = strtotime($row[ 'modified_at' ]);
 
                 $content->markdownFile = CROSSROADS_CONTENT_DIR . '/' . $row[ 'content_slug' ];
+                $content->markdownData = $row[ 'markdown' ] ?? '';
 
                 $content->contentPath = $content->contentType . '/' . $content->slug;
                 $content->unique = md5($content->contentType . '/' . $content->slug);
@@ -112,7 +113,10 @@ class Entries
                     $draftFile = CROSSROADS_PUBLIC_DIR . $content->relUrl;
                     if (file_exists($draftFile)) {
                         @unlink($draftFile);
+                        @unlink($draftFile . '.md');
                         LOG(sprintf(_i18n('core.class.entries.removing_draft'), $content->slug), 2, Log::INFO);
+                    } elseif (file_exists($draftFile . '.md')) {
+                        @unlink($draftFile . '.md');
                     }
                     LOG(sprintf(_i18n('core.class.entries.skipping_draft'), $content->slug), 2, Log::INFO);
                     continue;
@@ -201,7 +205,10 @@ class Entries
                             $draftFile = CROSSROADS_PUBLIC_DIR . $content->relUrl;
                             if (file_exists($draftFile)) {
                                 @unlink($draftFile);
+                                @unlink($draftFile . '.md');
                                 LOG(sprintf(_i18n('core.class.entries.removing_draft'), $content->slug), 2, Log::INFO);
+                            } elseif (file_exists($draftFile . '.md')) {
+                                @unlink($draftFile . '.md');
                             }
                             LOG(sprintf(_i18n('core.class.entries.skipping_draft'), $content->slug), 2, Log::INFO);
                             continue;

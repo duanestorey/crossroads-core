@@ -77,6 +77,12 @@ class Renderer
 
             file_put_contents(CROSSROADS_PUBLIC_DIR . $params->content->relUrl, $renderedHtml);
 
+            // Write markdown version for LLM consumption (llms.txt companion)
+            if ($entry->markdownData) {
+                $mdContent = '# ' . $entry->title . "\n\n" . $entry->markdownData;
+                file_put_contents(CROSSROADS_PUBLIC_DIR . $params->content->relUrl . '.md', $mdContent);
+            }
+
             LOG(sprintf(_i18n('core.class.renderer.output'), CROSSROADS_PUBLIC_DIR . $params->content->relUrl), 4, Log::DEBUG);
         }
     }
