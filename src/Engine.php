@@ -17,6 +17,7 @@ class Engine
     protected $startTime = null;
     protected $fileLog = null;
     protected $db = null;
+    protected $flags = [];
 
     protected $pluginManager = null;
 
@@ -34,6 +35,8 @@ class Engine
         $this->pluginManager->installPlugin(new WordPressPlugin($this->config));
 
         $this->db = new DB($this->config);
+
+        $this->_extractFlags($argc, $argv);
 
         if ($argc <= 1) {
             $this->_branding();
@@ -309,6 +312,7 @@ class Engine
                 $content .= 'title: "' . $s . "\"\n";
                 $content .= 'publishDate: "' . $now . "\"\n";
                 $content .= 'slug: "' . $slug . "\"\n";
+                $content .= "draft: true\n";
 
                 $taxonomies = $this->config->get('content.' . $contentType . '.taxonomy', []);
                 foreach ($taxonomies as $tax) {
@@ -410,6 +414,7 @@ class Engine
 
         echo _i18n('core.usage.proper') . "\n\n";
         echo sprintf($spacing, 'php crossroads build') . _i18n('core.usage.build') . "\n";
+        echo sprintf($spacing, 'php crossroads build --drafts') . _i18n('core.usage.build_drafts') . "\n";
         echo sprintf($spacing, 'php crossroads clean') . _i18n('core.usage.clean') . "\n";
         echo sprintf($spacing, 'php crossroads create plugin') . _i18n('core.usage.create.plugin') . "\n";
         echo sprintf($spacing, 'php crossroads create theme') . _i18n('core.usage.create.theme') . "\n";
@@ -449,8 +454,32 @@ class Engine
         }
     }
 
+    private function _extractFlags(&$argc, &$argv)
+    {
+        $cleaned = [];
+        foreach ($argv as $arg) {
+            if (str_starts_with($arg, '--')) {
+                $this->flags[] = substr($arg, 2);
+            } else {
+                $cleaned[] = $arg;
+            }
+        }
+        $argv = $cleaned;
+        $argc = count($argv);
+    }
+
+    private function _hasFlag($name)
+    {
+        return in_array($name, $this->flags);
+    }
+
     private function _build($argc, $argv)
     {
+        if ($this->_hasFlag('drafts')) {
+            $this->config->set('options.include_drafts', true);
+            LOG(_i18n('core.build.drafts_enabled'), 1, Log::INFO);
+        }
+
         LOG(_i18n('core.build.starting'));
 
         $this->builder = new Builder($this->config, $this->pluginManager, $this->db);
@@ -475,16 +504,7 @@ class Engine
 
     private function _serve($argc, $argv)
     {
-        $server = new WebServer();
-        $server->init();
-
-        $openCommand = $this->config->get('options.browser.open_command');
-        if ($openCommand && $this->config->get('options.browser.auto')) {
-            exec(sprintf($openCommand, 'http://' . $server->addressAndPort()));
-        }
-
-        LOG(_i18n('core.class.server.to_close'), 1, Log::INFO);
-
-        $server->serve();
+        $server = new DevServer($this->config, $this->pluginManager, $this->db);
+        $server->start();
     }
 }

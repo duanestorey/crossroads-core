@@ -22,6 +22,14 @@ core:
     import:
       wordpress:
         "Imports from a WordPress website"
+  devserver:
+    started: "Servidor de desarrollo iniciado en %s:%s"
+    watching: "Observando cambios en archivos..."
+    change_detected: "Archivo %s: [%s]"
+    rebuilding: "Cambios detectados, reconstruyendo..."
+    rebuild_complete: "Reconstruccion completada"
+    server_died: "El proceso del servidor murio inesperadamente"
+    failed_start: "No se pudo iniciar el servidor de desarrollo"
   server:
     started: "Web server successfully started at %s:%s"
     stopping: "Shutting down web server"

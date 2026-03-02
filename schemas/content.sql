@@ -14,7 +14,8 @@ CREATE TABLE "content"
     "featured" VARCHAR(256),
     "markdown" VARCHAR,
     "original_html" VARCHAR,
-    "html" VARCHAR
+    "html" VARCHAR,
+    "draft" INTEGER DEFAULT 0
 );
 CREATE INDEX created_at_index ON content( created_at );
 CREATE INDEX hash_index ON content( hash );

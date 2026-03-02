@@ -41,6 +41,7 @@ class Content
     public $relUrl = '';
     public $unique = '';
     public $modifiedHash = '';
+    public $isDraft = false;
     public $imageInfo = [];
     public $contentPath = '';
 

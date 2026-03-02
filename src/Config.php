@@ -20,4 +20,9 @@ class Config
             return $default;
         }
     }
+
+    public function set($key, $value)
+    {
+        $this->config[ $key ] = $value;
+    }
 }

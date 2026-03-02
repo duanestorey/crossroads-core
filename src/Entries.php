@@ -104,6 +104,12 @@ class Entries
                 $content->contentPath = $content->contentType . '/' . $content->slug;
                 $content->unique = md5($content->contentType . '/' . $content->slug);
                 $content->className = $content->slug;
+                $content->isDraft = !empty($row[ 'draft' ]);
+
+                if ($content->isDraft && !$this->config->get('options.include_drafts', false)) {
+                    LOG(sprintf(_i18n('core.class.entries.skipping_draft'), $content->slug), 2, Log::INFO);
+                    continue;
+                }
 
                 $tax = $this->db->getAllTaxForContent($row[ 'id' ]);
                 while ($taxRow = $tax->fetchArray(SQLITE3_ASSOC)) {
@@ -166,6 +172,7 @@ class Entries
                             $content->publishDate = strtotime($this->_findDataInFrontMatter([ 'date', 'publishDate' ], $front, date('Y-m-d')));
                             $content->featuredImage = $this->_findDataInFrontMatter([ 'featuredImage', 'coverImage', 'heroImage' ], $front, $content->featuredImage);
                             $content->description = $this->_findDataInFrontMatter([ 'description' ], $front, $content->description);
+                            $content->isDraft = (bool) $this->_findDataInFrontMatter([ 'draft', 'isDraft' ], $front, false);
 
                             if (isset($contentConfig[ 'taxonomy' ])) {
                                 foreach ($contentConfig[ 'taxonomy' ] as $tax => $variations) {
@@ -182,6 +189,11 @@ class Entries
                         }
 
                         $content->originalHtml = $content->html;
+
+                        if ($content->isDraft && !$this->config->get('options.include_drafts', false)) {
+                            LOG(sprintf(_i18n('core.class.entries.skipping_draft'), $content->slug), 2, Log::INFO);
+                            continue;
+                        }
 
                         $content->calculate();
                         $content->processImages();

@@ -53,9 +53,7 @@ class WordPress
 
                     if ($decoded && count($decoded)) {
                         foreach ($decoded as $entry) {
-                            if ($entry->status	 != 'publish') {
-                                continue;
-                            }
+                            $isDraft = ($entry->status !== 'publish');
 
                             $wp_entry = new \stdClass();
                             $wp_entry->publishDate = strtotime($entry->date_gmt);
@@ -110,6 +108,10 @@ class WordPress
                             $file_content .= sprintf("%s: \"%s\"\n", 'publishDate', date('Y-m-d', $wp_entry->publishDate));
                             $file_content .= sprintf("%s: \"%s\"\n", 'modifiedDate', date('Y-m-d', $wp_entry->modifiedDate));
                             $file_content .= sprintf("%s: \"%s\"\n", 'slug', $this->_escapeYaml($wp_entry->permalink));
+
+                            if ($isDraft) {
+                                $file_content .= "draft: true\n";
+                            }
 
                             if ($wp_entry->author) {
                                 $file_content .= sprintf("%s: \"%s\"\n", 'author', $this->_escapeYaml($wp_entry->author));

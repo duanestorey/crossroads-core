@@ -178,6 +178,9 @@ class Builder
             usort($entries, 'CR\cr_sort');
 
             foreach ($entries as $entry) {
+                if ($entry->isDraft) {
+                    continue;
+                }
                 $sitemapXml = $this->_addSitemapEntry($sitemapXml, $entry->url);
             }
 

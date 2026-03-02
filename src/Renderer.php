@@ -58,6 +58,14 @@ class Renderer
                 $renderedHtml = $this->formatter->beautify($renderedHtml);
             }
 
+            if ($entry->isDraft) {
+                $banner = '<div style="position:fixed;top:0;left:0;right:0;z-index:99999;'
+                    . 'background:#f59e0b;color:#000;text-align:center;padding:8px 16px;'
+                    . 'font-family:system-ui,sans-serif;font-size:14px;font-weight:600;">'
+                    . _i18n('core.build.draft_banner') . '</div>';
+                $renderedHtml = preg_replace('/(<body[^>]*>)/i', '$1' . $banner, $renderedHtml, 1);
+            }
+
             // check directory
             $dirname = pathinfo(CROSSROADS_PUBLIC_DIR . $params->content->relUrl, PATHINFO_DIRNAME);
             if (!file_exists($dirname)) {

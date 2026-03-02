@@ -23,7 +23,7 @@ class DB
         $this->sql->query('BEGIN');
 
         $stmt = $this->sql->prepare(
-            'INSERT INTO "content" (type, hash, rel_url, slug, html, title, description, featured, created_at, modified_at, content_slug, markdown, original_html) VALUES (:type, :hash, :rel_url, :slug, :html, :title, :description, :featured, :created_at, :modified_at, :content_slug, :markdown, :original_html)'
+            'INSERT INTO "content" (type, hash, rel_url, slug, html, title, description, featured, created_at, modified_at, content_slug, markdown, original_html, draft) VALUES (:type, :hash, :rel_url, :slug, :html, :title, :description, :featured, :created_at, :modified_at, :content_slug, :markdown, :original_html, :draft)'
         );
         $stmt->bindValue(':type', $content->contentType, SQLITE3_TEXT);
         $stmt->bindValue(':hash', $content->unique, SQLITE3_TEXT);
@@ -38,6 +38,7 @@ class DB
         $stmt->bindValue(':content_slug', $content->contentPath, SQLITE3_TEXT);
         $stmt->bindValue(':markdown', $content->markdownData, SQLITE3_TEXT);
         $stmt->bindValue(':original_html', $content->originalHtml, SQLITE3_TEXT);
+        $stmt->bindValue(':draft', $content->isDraft ? 1 : 0, SQLITE3_INTEGER);
 
         LOG(sprintf('Importing [%s]', $content->slug), 2, Log::DEBUG);
 
