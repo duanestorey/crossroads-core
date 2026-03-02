@@ -34,6 +34,7 @@ core:
         content: "Processing content file [%s]"
         loading: "Loading content type [%s]"
       skipping_draft: "Skipping draft entry [%s]"
+      removing_draft: "Removing stale draft HTML [%s]"
     renderer:
       output: "Outputting template file [%s]"
     theme:

@@ -106,12 +106,22 @@ class Entries
                 $content->className = $content->slug;
                 $content->isDraft = !empty($row[ 'draft' ]);
 
+                $content->calculate();
+
+                if ($content->isDraft && !$this->config->get('options.include_drafts', false)) {
+                    $draftFile = CROSSROADS_PUBLIC_DIR . $content->relUrl;
+                    if (file_exists($draftFile)) {
+                        @unlink($draftFile);
+                        LOG(sprintf(_i18n('core.class.entries.removing_draft'), $content->slug), 2, Log::INFO);
+                    }
+                    LOG(sprintf(_i18n('core.class.entries.skipping_draft'), $content->slug), 2, Log::INFO);
+                    continue;
+                }
+
                 $tax = $this->db->getAllTaxForContent($row[ 'id' ]);
                 while ($taxRow = $tax->fetchArray(SQLITE3_ASSOC)) {
                     $content->taxonomy[ $taxRow[ 'tax' ] ][] = $taxRow[ 'term' ];
                 }
-
-                $content->calculate();
 
                 if ($content->featuredImage) {
                     $content->featuredImageData = $imageProcessor->processImage($content, $content->featuredImage);
@@ -186,6 +196,16 @@ class Entries
                         $content->originalHtml = $content->html;
 
                         $content->calculate();
+
+                        if ($content->isDraft && !$this->config->get('options.include_drafts', false)) {
+                            $draftFile = CROSSROADS_PUBLIC_DIR . $content->relUrl;
+                            if (file_exists($draftFile)) {
+                                @unlink($draftFile);
+                                LOG(sprintf(_i18n('core.class.entries.removing_draft'), $content->slug), 2, Log::INFO);
+                            }
+                            LOG(sprintf(_i18n('core.class.entries.skipping_draft'), $content->slug), 2, Log::INFO);
+                            continue;
+                        }
                         $content->processImages();
 
                         if (!$content->description) {
