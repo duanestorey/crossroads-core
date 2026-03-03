@@ -8,12 +8,24 @@ class ImageProcessor
     public $convertToWebp = false;
     public $generateResponsive = false;
 
+    public $jpegQuality = 82;
+    public $webpQuality = 80;
+    public $pngCompression = 6;
+    public $avifQuality = 63;
+    public $responsiveSizes = [ 320, 480, 640, 960, 1360, 1600 ];
+
     public function __construct($config)
     {
         $this->config = $config;
 
         $this->convertToWebp = $config->get('options.images.convert_to_webp');
         $this->generateResponsive = $config->get('options.images.generate_responsive');
+
+        $this->jpegQuality = $config->get('options.images.jpeg_quality', 82);
+        $this->webpQuality = $config->get('options.images.webp_quality', 80);
+        $this->pngCompression = $config->get('options.images.png_compression', 6);
+        $this->avifQuality = $config->get('options.images.avif_quality', 63);
+        $this->responsiveSizes = $config->get('options.images.responsive_sizes', [ 320, 480, 640, 960, 1360, 1600 ]);
     }
 
     public function processImage($content, $imageFile)
@@ -92,24 +104,24 @@ class ImageProcessor
 
             if ($formatConversion) {
                 imagepalettetotruecolor($imageData);
-                imageavif($imageData, $destinationImage);
+                imageavif($imageData, $destinationImage, $this->avifQuality);
             } else {
                 switch ($destExt) {
                     case 'jpg':
                     case 'jpeg':
-                        imagejpeg($imageData, $destinationImage);
+                        imagejpeg($imageData, $destinationImage, $this->jpegQuality);
                         break;
                     case 'gif':
                         imagegif($imageData, $destinationImage);
                         break;
                     case 'webp':
-                        imagewebp($imageData, $destinationImage);
+                        imagewebp($imageData, $destinationImage, $this->webpQuality);
                         break;
                     case 'png':
-                        imagepng($imageData, $destinationImage);
+                        imagepng($imageData, $destinationImage, $this->pngCompression);
                         break;
                     default:
-                        echo "............unknown image format writing\n";
+                        LOG('Unknown image format for writing [' . $destinationImage . ']', 2, Log::WARNING);
                         break;
                 }
             }
@@ -146,7 +158,6 @@ class ImageProcessor
 
         // skip if already done
         if (file_exists($destinationImage)) {
-            ///echo "....skipping image " . $destinationImage . "\n";
             return $this->_getImageInformation($destinationImage, $isPrimary);
         }
 
@@ -159,7 +170,7 @@ class ImageProcessor
                     LOG('Potentially converting image to width [' . $forceWidth . ']', 4, Log::DEBUG);
                 }
             } elseif ($formatConversion) {
-                echo "............converting image to AVIF\n";
+                LOG('Converting image to AVIF [' . $destinationImage . ']', 4, Log::DEBUG);
             }
 
             $result = $this->_convert_image($sourceImage, $destinationImage, $forceWidth, $formatConversion);
@@ -280,9 +291,7 @@ class ImageProcessor
                 $mainImage = $this->_convertOrCopyImage($foundFile, $destinationFile, true, false, $this->convertToWebp);
                 if ($mainImage && $this->generateResponsive) {
                     if ($mainImage->is_local && $mainImage->isValid) {
-                        $responsiveSizes = [ 320, 480, 640, 960, 1360, 1600 ];
-
-                        foreach ($responsiveSizes as $size) {
+                        foreach ($this->responsiveSizes as $size) {
                             $image = $this->_convertOrCopyImage($foundFile, $destinationFile, false, $size, $this->convertToWebp);
 
                             if ($image) {

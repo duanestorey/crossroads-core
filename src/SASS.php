@@ -20,6 +20,7 @@ class SASS
             $contents = file_get_contents($filename);
 
             $compiler = new Compiler();
+            $compiler->addImportPath(pathinfo($filename, PATHINFO_DIRNAME));
 
             $sass = $compiler->compileString($contents)->getCss();
         }
