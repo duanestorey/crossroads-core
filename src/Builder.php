@@ -221,7 +221,7 @@ class Builder
     private function _writeRobots()
     {
         // write robots
-        $robots = "user-agent: *\ndisallow: /assets/css/\ndisallow: /assets/js/\nallow: /\n\nUser-agent: Twitterbot\nallow: /\nSitemap: " . $this->config->get('site.url') . "/sitemap.xml\nLLMsTxt: " . $this->config->get('site.url') . '/llms.txt';
+        $robots = "user-agent: *\ndisallow: /assets/css/\ndisallow: /assets/js/\nallow: /\n\nUser-agent: Twitterbot\nallow: /\nSitemap: " . $this->config->get('site.url') . '/sitemap.xml';
         file_put_contents(CROSSROADS_PUBLIC_DIR . '/robots.txt', $robots);
 
         LOG(sprintf(_i18n('core.build.writing'), 'robots.txt'), 1, Log::INFO);

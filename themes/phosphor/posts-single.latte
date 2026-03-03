@@ -4,9 +4,9 @@
                         <div class="post-header">
                             <h1 class="post-title">{$content->title}</h1>
                             <div class="post-meta">
-                                <span>{$content->publishDate|date:'F j, Y \\a\\t g:ia'}</span>
+                                <span><i class="nf nf-fa-calendar"></i> {$content->publishDate|date:'F j, Y \\a\\t g:ia'}</span>
                                 <span>&middot;</span>
-                                <span>{$content->readingTime}</span>
+                                <span><i class="nf nf-fa-clock_o"></i> {$content->readingTime}</span>
                             </div>
                         </div>
 
@@ -20,7 +20,7 @@
                         <div class="post-tags">
                             {foreach $content->taxonomy as $tax => $terms}
                                 {foreach $terms as $term}
-                                <a href="{$content->taxonomyLinks[$tax][$term]}" class="tag">--{$term|replace: ['-' => '-']}</a>
+                                <a href="{$content->taxonomyLinks[$tax][$term]}" class="tag"><i class="nf nf-fa-tag"></i> --{$term|replace: ['-' => '-']}</a>
                                 {/foreach}
                             {/foreach}
                         </div>
