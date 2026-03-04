@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-03-04
+
+### Fixed
+- Exception shadowing in `Engine` and `DevServer`: `catch (Exception)` in namespace `CR` only caught `CR\Exception`, missing `RuntimeException`, `TypeError`, etc. — now catches `\Throwable` as fallback
+- `Menu::loadMenus()` assigned `false` to typed `array` property when `YAML::parse_file()` failed, causing `TypeError` crash on malformed `menus.yaml`
+- Content hash overwritten in `Entries::loadAllDb()` — DB hash was immediately replaced with a different algorithm, causing mismatches between file-based and DB-based load paths
+- `Theme::getAssetHash()` used file size concatenation instead of content hashing — CSS edits that didn't change file size failed to bust cache
+- Foreign key constraints in `taxonomy.sql` and `images.sql` lacked `ON DELETE CASCADE`, leaving orphaned rows on content deletion
+
+### Added
+- `Builder::sanitizeDescription()` public static method extracted from `_writeLlmsTxt()` for testability
+
 ## [1.5.0] - 2026-03-02
 
 ### Fixed
