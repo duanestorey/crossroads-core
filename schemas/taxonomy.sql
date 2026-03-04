@@ -5,7 +5,7 @@ CREATE TABLE "taxonomy"
     "type" VARCHAR,
     "tax" VARCHAR,
     "term" VARCHAR,
-    "content_id" INTEGER REFERENCES content(id)
+    "content_id" INTEGER REFERENCES content(id) ON DELETE CASCADE
 );
 CREATE INDEX tax_index ON taxonomy( tax );
 CREATE INDEX term_index ON taxonomy( term );

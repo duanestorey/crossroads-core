@@ -122,7 +122,6 @@ class Entries
                 $content->markdownData = $row['markdown'] ?? '';
 
                 $content->contentPath = $content->contentType . '/' . $content->slug;
-                $content->unique = md5($content->contentType . '/' . $content->slug);
                 $content->className = $content->slug;
                 $content->isDraft = !empty($row['draft']);
 

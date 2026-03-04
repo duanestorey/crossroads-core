@@ -103,15 +103,16 @@ class Theme
 
     public function getAssetHash(): string
     {
-        $hashValue = 0;
+        $parts = [];
 
         foreach ($this->themeConfig->get('theme.assets', []) as $destName => $sources) {
-            if (file_exists(CROSSROADS_PUBLIC_DIR . '/assets/' . $destName)) {
-                $hashValue = $hashValue . filesize(CROSSROADS_PUBLIC_DIR . '/assets/' . $destName);
+            $path = CROSSROADS_PUBLIC_DIR . '/assets/' . $destName;
+            if (file_exists($path)) {
+                $parts[] = md5_file($path);
             }
         }
 
-        return md5((string) $hashValue);
+        return substr(md5(implode('', $parts)), 0, 8);
     }
 
     protected function accumulateAssets(string $contentSoFar, string $actualFile): string

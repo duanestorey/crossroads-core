@@ -15,7 +15,10 @@ class Menu
     public function loadMenus(): void
     {
         if (file_exists($this->menuFile)) {
-            $this->menuData = YAML::parse_file($this->menuFile);
+            $parsed = YAML::parse_file($this->menuFile);
+            if ($parsed) {
+                $this->menuData = $parsed;
+            }
         }
 
         $localFile = \CROSSROADS_CONFIG_DIR . '/menus.local.yaml';

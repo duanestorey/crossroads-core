@@ -334,11 +334,7 @@ class Builder
                 $mdUrl = $entry->url . '.md';
                 $desc = '';
                 if ($entry->description) {
-                    $descText = trim(preg_replace('/\s+/', ' ', $entry->description));
-                    if (mb_strlen($descText) > 200) {
-                        $descText = mb_substr($descText, 0, 200) . '...';
-                    }
-                    $desc = ': ' . $descText;
+                    $desc = ': ' . self::sanitizeDescription($entry->description);
                 }
                 $llms .= '- [' . $entry->title . '](' . $mdUrl . ')' . $desc . "\n";
 
@@ -377,5 +373,14 @@ class Builder
         LOG(_i18n('core.theme.loaded'), 2, Log::INFO);
 
         $this->theme->processAssets();
+    }
+
+    public static function sanitizeDescription(string $description): string
+    {
+        $descText = trim(preg_replace('/\s+/', ' ', $description));
+        if (mb_strlen($descText) > 200) {
+            $descText = mb_substr($descText, 0, 200) . '...';
+        }
+        return $descText;
     }
 }

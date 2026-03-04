@@ -126,6 +126,8 @@ class DevServer
             $builder->run();
         } catch (Exception $e) {
             LOG(sprintf(_i18n('core.app.exception'), $e->name(), $e->msg()), 0, Log::ERROR);
+        } catch (\Throwable $e) {
+            LOG('Unexpected error: ' . $e->getMessage(), 0, Log::ERROR);
         }
     }
 
