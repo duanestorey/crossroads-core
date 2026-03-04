@@ -7,7 +7,7 @@ CREATE TABLE "images"
     "width" INTEGER,
     "height" INTEGER,
     "mod_time" TIMESTAMP,
-    "content_id" INTEGER
+    "content_id" INTEGER REFERENCES content(id)
 );
 CREATE INDEX filename_index ON images( filename );
 CREATE INDEX content_index ON images( content_id );

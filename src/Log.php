@@ -4,36 +4,41 @@ namespace CR;
 
 class Log
 {
-    public const DEBUG = 0;
-    public const INFO = 1;
-    public const WARNING = 2;
-    public const ERROR = 3;
-    public const FATAL = 10;
+    public const int DEBUG = 0;
+    public const int INFO = 1;
+    public const int WARNING = 2;
+    public const int ERROR = 3;
+    public const int FATAL = 10;
 
-    private static $instance = null;
-    public $listeners = [];
+    private static ?Log $instance = null;
+
+    /** @var LogListener[] */
+    public array $listeners = [];
 
     protected function __construct()
     {
     }
 
-    public function log($message, $tabs = 0, $level = Log::INFO)
+    public function log(string $message, int $tabs = 0, int $level = Log::INFO): void
     {
-        if (count($this->listeners)) {
-            foreach ($this->listeners as $listener) {
-                $listener->log($message, $tabs, $level);
-            }
+        foreach ($this->listeners as $listener) {
+            $listener->log($message, $tabs, $level);
         }
     }
 
-    public function installListener($listener)
+    public function installListener(LogListener $listener): void
     {
         $this->listeners[] = $listener;
     }
 
-    public static function instance()
+    public function clearListeners(): void
     {
-        if (self::$instance == null) {
+        $this->listeners = [];
+    }
+
+    public static function instance(): Log
+    {
+        if (self::$instance === null) {
             self::$instance = new Log();
         }
 
@@ -41,7 +46,7 @@ class Log
     }
 }
 
-function LOG($message, $tabs = 0, $level = Log::INFO)
+function LOG(string $message, int $tabs = 0, int $level = Log::INFO): void
 {
     Log::instance()->log($message, $tabs, $level);
 }

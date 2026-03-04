@@ -4,7 +4,7 @@ namespace CR;
 
 class YAML
 {
-    public static function parse_file($path_to_file, $flatten = false)
+    public static function parse_file(string $path_to_file, bool $flatten = false): array|false
     {
         $value = false;
 
@@ -21,11 +21,11 @@ class YAML
         return $value;
     }
 
-    public static function flatten($yaml_data, $base_string = '')
+    public static function flatten(array|false $yaml_data, string $base_string = ''): array
     {
         $flattened = [];
 
-        if (count($yaml_data)) {
+        if ($yaml_data) {
             foreach ($yaml_data as $key => $data) {
                 if ($base_string) {
                     $new_string = $base_string . '.' . $key;
@@ -46,7 +46,7 @@ class YAML
         return $flattened;
     }
 
-    public static function parse($data)
+    public static function parse(string $data): array|false
     {
         $value = false;
 

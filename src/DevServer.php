@@ -4,17 +4,18 @@ namespace CR;
 
 class DevServer
 {
-    protected $config;
-    protected $pluginManager;
-    protected $db;
-    protected $port = 0;
-    protected $address = '127.0.0.1';
-    protected $process = null;
-    protected $shutdown = false;
-    protected $buildId = 0;
-    protected $stateFile = '';
+    protected Config $config;
+    protected PluginManager $pluginManager;
+    protected DB $db;
+    protected int $port = 0;
+    protected string $address = '127.0.0.1';
+    /** @var resource|null */
+    protected mixed $process = null;
+    protected bool $shutdown = false;
+    protected int $buildId = 0;
+    protected string $stateFile = '';
 
-    public function __construct($config, $pluginManager, $db)
+    public function __construct(Config $config, PluginManager $pluginManager, DB $db)
     {
         $this->config = $config;
         $this->pluginManager = $pluginManager;
@@ -22,7 +23,7 @@ class DevServer
         $this->stateFile = CROSSROADS_PUBLIC_DIR . '/.devserver-state.json';
     }
 
-    public function start()
+    public function start(): void
     {
         // Always include drafts in serve mode
         $this->config->set('options.include_drafts', true);
@@ -50,7 +51,13 @@ class DevServer
         // Auto-open browser
         $openCommand = $this->config->get('options.browser.open_command');
         if ($openCommand && $this->config->get('options.browser.auto')) {
-            exec(sprintf($openCommand, 'http://' . $this->address . ':' . $this->port));
+            $cmd = explode(' ', $openCommand)[0];
+            $allowedCommands = ['open', 'xdg-open', 'start'];
+            if (in_array(basename($cmd), $allowedCommands)) {
+                exec(str_replace('%s', escapeshellarg('http://' . $this->address . ':' . $this->port), $openCommand));
+            } else {
+                LOG('Untrusted browser command: ' . $cmd, 0, Log::ERROR);
+            }
         }
 
         LOG(_i18n('core.devserver.watching'), 1, Log::INFO);
@@ -112,7 +119,7 @@ class DevServer
         $this->_cleanup();
     }
 
-    protected function _runBuild()
+    protected function _runBuild(): void
     {
         $builder = new Builder($this->config, $this->pluginManager, $this->db);
         try {
@@ -122,7 +129,7 @@ class DevServer
         }
     }
 
-    protected function _findAvailablePort()
+    protected function _findAvailablePort(): int
     {
         $sock = socket_create(AF_INET, SOCK_STREAM, 0);
         socket_bind($sock, $this->address, 0);
@@ -131,7 +138,7 @@ class DevServer
         return $port;
     }
 
-    protected function _startServer()
+    protected function _startServer(): void
     {
         $routerPath = CROSSROADS_SRC_DIR . '/devserver-router.php';
         $docRoot = CROSSROADS_PUBLIC_DIR;
@@ -154,13 +161,16 @@ class DevServer
         $this->process = proc_open($cmd, $descriptors, $pipes);
     }
 
-    protected function _writeState()
+    protected function _writeState(): void
     {
-        @mkdir(dirname($this->stateFile), 0755, true);
+        $dir = dirname($this->stateFile);
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
         file_put_contents($this->stateFile, json_encode([ 'buildId' => $this->buildId ]));
     }
 
-    protected function _cleanup()
+    protected function _cleanup(): void
     {
         if ($this->process && is_resource($this->process)) {
             $status = proc_get_status($this->process);
@@ -171,13 +181,13 @@ class DevServer
         }
 
         if (file_exists($this->stateFile)) {
-            @unlink($this->stateFile);
+            unlink($this->stateFile);
         }
 
         LOG(_i18n('core.class.server.stopping'), 0, Log::INFO);
     }
 
-    public function _handleSignal($signal)
+    public function _handleSignal(int $signal): void
     {
         $this->shutdown = true;
     }

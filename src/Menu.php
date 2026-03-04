@@ -4,15 +4,15 @@ namespace CR;
 
 class Menu
 {
-    public $menuData = [];
-    public $menuFile = null;
+    public array $menuData = [];
+    public ?string $menuFile = null;
 
     public function __construct()
     {
         $this->menuFile = \CROSSROADS_CONFIG_DIR . '/menus.yaml';
     }
 
-    public function loadMenus()
+    public function loadMenus(): void
     {
         if (file_exists($this->menuFile)) {
             $this->menuData = YAML::parse_file($this->menuFile);
@@ -27,12 +27,13 @@ class Menu
         }
     }
 
-    public function isAvailable($menuName)
+    public function isAvailable(string $menuName): bool
     {
         return isset($this->menuData[ $menuName ]);
     }
 
-    public function getAvailable()
+    /** @return string[] */
+    public function getAvailable(): array
     {
         $available = [];
 
@@ -43,7 +44,8 @@ class Menu
         return $available;
     }
 
-    public function build($menuName, $currentPage)
+    /** @return list<\stdClass>|false */
+    public function build(string $menuName, string $currentPage): array|false
     {
         $menuData = false;
         if (isset($this->menuData[ $menuName ])) {

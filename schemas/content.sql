@@ -7,7 +7,7 @@ CREATE TABLE "content"
     "modified_at" DATETIME,
     "created_at" DATETIME,
     "type" VARCHAR(32),
-    "hash" VARCHAR(64),
+    "hash" VARCHAR(64) UNIQUE,
     "rel_url" VARCHAR(256),
     "slug" VARCHAR(256),
     "content_slug" VARCHAR(256),
@@ -20,3 +20,4 @@ CREATE TABLE "content"
 CREATE INDEX created_at_index ON content( created_at );
 CREATE INDEX hash_index ON content( hash );
 CREATE INDEX type_index ON content( type );
+CREATE INDEX idx_content_slug ON content( slug );

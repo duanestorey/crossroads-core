@@ -4,34 +4,38 @@ namespace CR;
 
 class Plugin
 {
-    protected $name = 'base';
+    protected string $name = 'base';
 
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
 
-    public function name()
+    public function name(): string
     {
         return $this->name;
     }
 
-    public function contentFilter($content)
+    public function contentFilter(mixed $content): mixed
     {
         return $content;
     }
 
-    public function templateParamFilter($params)
+    public function templateParamFilter(mixed $params): mixed
     {
         return $params;
     }
 
-    public function processOne($entry)
+    public function processOne(mixed $entry): mixed
     {
         return $entry;
     }
 
-    public function processAll($entries)
+    /**
+     * @param array $entries
+     * @return array
+     */
+    public function processAll(array $entries): array
     {
         $processed = [];
 

@@ -4,29 +4,29 @@ namespace CR;
 
 class Utils
 {
-    public static function fixPath($dir)
+    public static function fixPath(string $dir): string
     {
         return rtrim($dir, '\\/');
     }
 
-    public static function copyFile($source, $dest)
+    public static function copyFile(string $source, string $dest): void
     {
         copy($source, $dest);
     }
 
-    public static function mkdir($dirname)
+    public static function mkdir(string $dirname): void
     {
         if (!file_exists($dirname)) {
             @mkdir($dirname);
         }
     }
 
-    public static function titleToSlug($title)
+    public static function titleToSlug(string $title): string
     {
         return preg_replace('/[^a-zA-Z0-9-]/', '', str_replace([ ' ', '_', '-' ], '-', strtolower($title)));
     }
 
-    public static function recursiveRmdir($directory)
+    public static function recursiveRmdir(string $directory): void
     {
         $files = array_diff(scandir($directory), [ '.', '..' ]);
         if (count($files)) {
@@ -44,7 +44,7 @@ class Utils
         rmdir($directory);
     }
 
-    public static function curlDownloadFile($url)
+    public static function curlDownloadFile(string $url): string|false
     {
         $result = false;
 
@@ -71,12 +71,46 @@ class Utils
         return $result;
     }
 
-    public static function cleanTerm($term)
+    public static function cleanTerm(string $term): string
     {
         return strtolower(str_replace(' ', '-', $term));
     }
 
-    public static function findAllFilesWithExtension($directory, $ext)
+    /**
+     * Detect optimal worker count for parallel operations.
+     * Reads options.build_workers from config (0 = auto, 1 = sequential).
+     */
+    public static function getWorkerCount(Config $config): int
+    {
+        $configured = (int) $config->get('options.build_workers', 0);
+
+        if ($configured === 1) {
+            return 1;
+        }
+
+        if ($configured > 1) {
+            return min($configured, 8);
+        }
+
+        // Auto-detect CPU count
+        $cpuCount = 0;
+        if (PHP_OS_FAMILY === 'Darwin') {
+            $result = shell_exec('sysctl -n hw.ncpu 2>/dev/null');
+            if ($result !== null) {
+                $cpuCount = (int) trim($result);
+            }
+        } else {
+            $result = shell_exec('nproc 2>/dev/null');
+            if ($result !== null) {
+                $cpuCount = (int) trim($result);
+            }
+        }
+
+        return max(2, min($cpuCount ?: 4, 8));
+    }
+
+    /** @return string[] */
+    public static function findAllFilesWithExtension(string $directory, string|array $ext): array
     {
         $allFiles = [];
         if (!is_array($ext)) {

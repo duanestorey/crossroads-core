@@ -4,20 +4,20 @@ namespace CR;
 
 class LogListenerShell extends LogListener
 {
-    protected $currentLevel = Log::INFO;
-    protected $startTime = 0;
+    protected int $currentLevel = Log::INFO;
+    protected float $startTime = 0;
 
     public function __construct()
     {
         $this->startTime = microtime(true);
     }
 
-    public function setLevel($level)
+    public function setLevel(int $level): void
     {
         $this->currentLevel = $level;
     }
 
-    public function log($message, $tabs, $level)
+    public function log(string $message, int $tabs, int $level): void
     {
         if ($level < $this->currentLevel) {
             return;
@@ -41,7 +41,7 @@ class LogListenerShell extends LogListener
         }
     }
 
-    private function getTabsAsSpaces($tabs)
+    private function getTabsAsSpaces(int $tabs): string
     {
         $spaces = '';
         for ($i = 0; $i < $tabs; $i++) {

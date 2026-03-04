@@ -4,17 +4,17 @@ namespace CR;
 
 class Upgrade
 {
-    public $config = null;
+    public Config $config;
 
-    public $releasesApi = 'https://api.github.com/repos/duanestorey/crossroads/releases/latest';
-    public $releaseZipUrl = 'https://github.com/duanestorey/crossroads/archive/refs/tags/%s.zip';
+    public string $releasesApi = 'https://api.github.com/repos/duanestorey/crossroads/releases/latest';
+    public string $releaseZipUrl = 'https://github.com/duanestorey/crossroads/archive/refs/tags/%s.zip';
 
-    public function __construct($config)
+    public function __construct(Config $config)
     {
         $this->config = $config;
     }
 
-    public function runUpgrader()
+    public function runUpgrader(): void
     {
         if (CROSSROADS_IS_COMPOSER) {
             $this->runComposerUpgrade();
@@ -23,7 +23,7 @@ class Upgrade
         }
     }
 
-    private function runComposerUpgrade()
+    private function runComposerUpgrade(): void
     {
         LOG(_i18n('core.class.upgrade.composer_detected'), 1, Log::INFO);
         LOG(_i18n('core.class.upgrade.running_composer_update'), 1, Log::INFO);
@@ -43,7 +43,7 @@ class Upgrade
         }
     }
 
-    private function runGitHubUpgrade()
+    private function runGitHubUpgrade(): void
     {
         $releaseJson = Utils::curlDownloadFile($this->releasesApi);
         if (!$releaseJson) {
@@ -105,7 +105,7 @@ class Upgrade
         }
     }
 
-    private function downloadRelease($tagName)
+    private function downloadRelease(string $tagName): string|false
     {
         LOG(_i18n('core.class.upgrade.downloading'), 2, Log::INFO);
 

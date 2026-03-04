@@ -12,20 +12,21 @@ use CR\Plugins\WordPressPlugin;
 
 class Engine
 {
-    protected $builder = null;
-    protected $config = null;
-    protected $startTime = null;
-    protected $fileLog = null;
-    protected $db = null;
-    protected $flags = [];
+    protected ?Builder $builder = null;
+    protected ?Config $config = null;
+    protected ?float $startTime = null;
+    protected ?LogListenerFile $fileLog = null;
+    protected ?DB $db = null;
+    /** @var string[] */
+    protected array $flags = [];
 
-    protected $pluginManager = null;
+    protected ?PluginManager $pluginManager = null;
 
     public function __construct()
     {
     }
 
-    public function run($argc, $argv)
+    public function run(int $argc, array $argv): void
     {
         $this->_loadConfig();
         $this->_setupLocales();
@@ -91,7 +92,7 @@ class Engine
         }
     }
 
-    private function _setupFileLogs($command)
+    private function _setupFileLogs(string $command): void
     {
         Utils::mkdir(CROSSROADS_LOG_DIR);
         $logSlug = date('Y-m-d') . '-' . $command . '.log';
@@ -111,16 +112,18 @@ class Engine
         LOG(sprintf(_i18n('core.app.log'), CROSSROADS_LOG_SLUG . '/' . $logSlug), 0, Log::INFO);
     }
 
-    private function _newGetContentType($singularOrPlural)
+    private function _newGetContentType(string $singularOrPlural): ?string
     {
         foreach ($this->config->get('content') as $contentType => $contentConfig) {
             if (($contentType == $singularOrPlural) || ($singularOrPlural == $this->config->get('content.' . $contentType . '.singular'))) {
                 return $contentType;
             }
         }
+
+        return null;
     }
 
-    private function _db($argc, $argv)
+    private function _db(int $argc, array $argv): void
     {
         switch ($argv[ 2 ]) {
             case 'import':
@@ -159,7 +162,7 @@ class Engine
         }
     }
 
-    private function _init($argc, $argv)
+    private function _init(int $argc, array $argv): void
     {
         if ($this->_checkInit()) {
             LOG(_i18n('core.init.not_needed'), 1, Log::INFO);
@@ -188,7 +191,7 @@ class Engine
         LOG(_i18n('core.init.done'), 0, Log::INFO);
     }
 
-    private function _scaffoldSampleContent()
+    private function _scaffoldSampleContent(): void
     {
         $dirs = [
             CROSSROADS_CONTENT_DIR . '/posts',
@@ -237,7 +240,7 @@ class Engine
         }
     }
 
-    private function _stats($argc, $argv)
+    private function _stats(int $argc, array $argv): void
     {
         $content = $this->config->get('content');
         if ($content and count($content)) {
@@ -294,7 +297,7 @@ class Engine
         }
     }
 
-    private function _new($argc, $argv)
+    private function _new(int $argc, array $argv): void
     {
         $contentSingular = $argv[ 2 ];
         $contentType = $this->_newGetContentType($contentSingular);
@@ -334,7 +337,13 @@ class Engine
 
                 $openCommand = $this->config->get('options.markdown.open_command');
                 if ($openCommand && $this->config->get('options.markdown.auto')) {
-                    exec(sprintf($openCommand, CROSSROADS_CONTENT_DIR . '/' . $markdownFile));
+                    $cmd = explode(' ', $openCommand)[0];
+                    $allowedCommands = ['open', 'xdg-open', 'start', 'code', 'vim', 'nano', 'subl', 'atom'];
+                    if (in_array(basename($cmd), $allowedCommands)) {
+                        exec(str_replace('%s', escapeshellarg(CROSSROADS_CONTENT_DIR . '/' . $markdownFile), $openCommand));
+                    } else {
+                        LOG('Untrusted open command: ' . $cmd, 0, Log::ERROR);
+                    }
                 }
             }
         } else {
@@ -342,7 +351,8 @@ class Engine
         }
     }
 
-    private function _getAllowableCommands()
+    /** @return array<string, int> */
+    private function _getAllowableCommands(): array
     {
         return [
             'build' => 0,
@@ -357,7 +367,7 @@ class Engine
         ];
     }
 
-    private function _setupLocales()
+    private function _setupLocales(): void
     {
         $currentLocale = $this->config->get('site.lang');
         if ($currentLocale) {
@@ -368,7 +378,7 @@ class Engine
         }
     }
 
-    private function _loadConfig()
+    private function _loadConfig(): void
     {
         $base = YAML::parse_file(CROSSROADS_CONFIG_DIR . '/site.yaml', true);
 
@@ -383,18 +393,18 @@ class Engine
         $this->config = new Config($base);
     }
 
-    private function _checkConfig()
+    private function _checkConfig(): void
     {
         // check to make sure everything we need is here
     }
 
-    private function _upgrade()
+    private function _upgrade(): void
     {
         $upgrade = new Upgrade($this->config);
         $upgrade->runUpgrader();
     }
 
-    private function _branding()
+    private function _branding(): void
     {
         $brandAndVersion = '| ' . sprintf(_i18n('core.app.starting'), 'Crossroads', CROSSROADS_VERSION) . ' |';
         $header = '';
@@ -408,7 +418,7 @@ class Engine
         echo $header . "\n";
     }
 
-    private function _usage()
+    private function _usage(): void
     {
         $spacing = '%-60s';
 
@@ -434,7 +444,7 @@ class Engine
         echo sprintf($spacing, 'php crossroads upgrade') . _i18n('core.usage.upgrade') . "\n";
     }
 
-    private function _import($argc, $argv)
+    private function _import(int $argc, array $argv): void
     {
         if ($argc == 4) {
             $importer = $argv[ 2 ];
@@ -454,7 +464,7 @@ class Engine
         }
     }
 
-    private function _extractFlags(&$argc, &$argv)
+    private function _extractFlags(int &$argc, array &$argv): void
     {
         $cleaned = [];
         foreach ($argv as $arg) {
@@ -468,12 +478,12 @@ class Engine
         $argc = count($argv);
     }
 
-    private function _hasFlag($name)
+    private function _hasFlag(string $name): bool
     {
         return in_array($name, $this->flags);
     }
 
-    private function _build($argc, $argv)
+    private function _build(int $argc, array $argv): void
     {
         LOG(_i18n('core.build.starting'));
 
@@ -487,17 +497,17 @@ class Engine
 
     }
 
-    private function _clean($argc, $argv)
+    private function _clean(int $argc, array $argv): void
     {
         Utils::recursiveRmdir(CROSSROADS_PUBLIC_DIR);
     }
 
-    private function _checkInit()
+    private function _checkInit(): bool
     {
         return (file_exists(CROSSROADS_BASE_DIR . '/.crossroadsinit'));
     }
 
-    private function _serve($argc, $argv)
+    private function _serve(int $argc, array $argv): void
     {
         $server = new DevServer($this->config, $this->pluginManager, $this->db);
         $server->start();

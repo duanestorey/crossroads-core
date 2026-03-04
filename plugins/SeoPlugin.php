@@ -2,11 +2,12 @@
 
 namespace CR\Plugins;
 
+use CR\Config;
 use CR\Plugin;
 
 class SeoPlugin extends Plugin
 {
-    public $config = null;
+    public Config $config;
 
     private const LOCALE_MAP = [
         'en' => 'en_US',
@@ -23,19 +24,19 @@ class SeoPlugin extends Plugin
 
     private const JSON_FLAGS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG;
 
-    public function __construct($config)
+    public function __construct(Config $config)
     {
         parent::__construct('seo');
 
         $this->config = $config;
     }
 
-    public function processOne($content)
+    public function processOne(mixed $content): mixed
     {
         return $content;
     }
 
-    public function templateParamFilter($params)
+    public function templateParamFilter(mixed $params): mixed
     {
         $meta = [];
         $robotsDirectives = [];
@@ -61,7 +62,8 @@ class SeoPlugin extends Plugin
         return $params;
     }
 
-    private function buildSingleMeta($params)
+    /** @return string[] */
+    private function buildSingleMeta(\stdClass $params): array
     {
         $content = $params->content;
         $siteName = $this->config->get('site.name');
@@ -108,7 +110,8 @@ class SeoPlugin extends Plugin
         return $meta;
     }
 
-    private function buildIndexMeta($params)
+    /** @return array{string[], string[]} */
+    private function buildIndexMeta(\stdClass $params): array
     {
         $siteName = $this->config->get('site.name');
         $lang = $this->config->get('site.lang', 'en');
@@ -146,7 +149,7 @@ class SeoPlugin extends Plugin
         return [$meta, $robotsDirectives];
     }
 
-    private function buildSingleJsonLd($content, $siteName)
+    private function buildSingleJsonLd(object $content, string $siteName): string
     {
         $data = [
             '@context' => 'https://schema.org',
@@ -173,7 +176,7 @@ class SeoPlugin extends Plugin
         return '<script type="application/ld+json">' . json_encode($data, self::JSON_FLAGS) . '</script>';
     }
 
-    private function buildWebSiteJsonLd($siteName, $siteUrl)
+    private function buildWebSiteJsonLd(string $siteName, string $siteUrl): string
     {
         $data = [
             '@context' => 'https://schema.org',
@@ -185,7 +188,7 @@ class SeoPlugin extends Plugin
         return '<script type="application/ld+json">' . json_encode($data, self::JSON_FLAGS) . '</script>';
     }
 
-    private function extractTwitterHandle()
+    private function extractTwitterHandle(): ?string
     {
         $social = $this->config->get('site.social', []);
         if (!is_array($social)) {
@@ -210,7 +213,7 @@ class SeoPlugin extends Plugin
         return '@' . $username;
     }
 
-    private function resolveLocale($lang)
+    private function resolveLocale(string $lang): string
     {
         if (str_contains($lang, '_')) {
             return $lang;
@@ -219,7 +222,7 @@ class SeoPlugin extends Plugin
         return self::LOCALE_MAP[$lang] ?? $lang . '_' . strtoupper($lang);
     }
 
-    private function esc($value)
+    private function esc(mixed $value): string
     {
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     }

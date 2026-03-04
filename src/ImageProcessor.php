@@ -4,31 +4,35 @@ namespace CR;
 
 class ImageProcessor
 {
-    public $config = null;
-    public $convertToWebp = false;
-    public $generateResponsive = false;
+    public Config $config;
+    public bool $convertToWebp = false;
+    public bool $generateResponsive = false;
 
-    public $jpegQuality = 82;
-    public $webpQuality = 80;
-    public $pngCompression = 6;
-    public $avifQuality = 63;
-    public $responsiveSizes = [ 320, 480, 640, 960, 1360, 1600 ];
+    public int $jpegQuality = 82;
+    public int $webpQuality = 80;
+    public int $pngCompression = 6;
+    public int $avifQuality = 63;
+    /** @var int[] */
+    public array $responsiveSizes = [320, 480, 640, 960, 1360, 1600];
 
-    public function __construct($config)
+    /** @var array<string, array{0: int, 1: int, 2: int, 3: string, mime: string}|false> */
+    private array $imageSizeCache = [];
+
+    public function __construct(Config $config)
     {
         $this->config = $config;
 
-        $this->convertToWebp = $config->get('options.images.convert_to_webp');
-        $this->generateResponsive = $config->get('options.images.generate_responsive');
+        $this->convertToWebp = (bool) $config->get('options.images.convert_to_webp', false);
+        $this->generateResponsive = (bool) $config->get('options.images.generate_responsive', false);
 
         $this->jpegQuality = $config->get('options.images.jpeg_quality', 82);
         $this->webpQuality = $config->get('options.images.webp_quality', 80);
         $this->pngCompression = $config->get('options.images.png_compression', 6);
         $this->avifQuality = $config->get('options.images.avif_quality', 63);
-        $this->responsiveSizes = $config->get('options.images.responsive_sizes', [ 320, 480, 640, 960, 1360, 1600 ]);
+        $this->responsiveSizes = $config->get('options.images.responsive_sizes', [320, 480, 640, 960, 1360, 1600]);
     }
 
-    public function processImage($content, $imageFile)
+    public function processImage(Content $content, string $imageFile): \stdClass|false
     {
         $foundFile = false;
 
@@ -48,93 +52,104 @@ class ImageProcessor
         return $destUrl;
     }
 
-    private function _getImageNameForResponsive($destinationImage, $destinationWidth)
+    /**
+     * @return array{0: int, 1: int, 2: int, 3: string, mime: string}|false
+     */
+    private function _getCachedImageSize(string $path): array|false
+    {
+        if (!isset($this->imageSizeCache[$path])) {
+            $this->imageSizeCache[$path] = getimagesize($path);
+        }
+
+        return $this->imageSizeCache[$path];
+    }
+
+    private function _getImageNameForResponsive(string $destinationImage, int $destinationWidth): string
     {
         $imageExt = pathinfo($destinationImage, PATHINFO_EXTENSION);
 
         return str_replace('.' . $imageExt, '-' . $destinationWidth . 'w.' . $imageExt, $destinationImage);
     }
 
-    private function _convert_image($sourceImage, $destinationImage, $forceWidth = false, $formatConversion = false)
+    private function _convert_image(string $sourceImage, string $destinationImage, int|false $forceWidth = false, bool $formatConversion = false): bool
     {
         $sourceExt = pathinfo($sourceImage, PATHINFO_EXTENSION);
         $destExt = pathinfo($destinationImage, PATHINFO_EXTENSION);
 
         $imageData = false;
-        $imageSize = getimagesize($sourceImage);
+        $imageSize = $this->_getCachedImageSize($sourceImage);
 
-        if ($imageSize && $forceWidth && $forceWidth > $imageSize[ 0 ]) {
+        if ($imageSize && $forceWidth && $forceWidth > $imageSize[0]) {
             return false;
         }
 
         switch ($sourceExt) {
             case 'jpg':
             case 'jpeg':
-                $imageData = @imagecreatefromjpeg($sourceImage);
+                $imageData = imagecreatefromjpeg($sourceImage);
                 break;
             case 'gif':
-                $imageData = @imagecreatefromgif($sourceImage);
+                $imageData = imagecreatefromgif($sourceImage);
                 break;
             case 'webp':
-                $imageData = @imagecreatefromwebp($sourceImage);
+                $imageData = imagecreatefromwebp($sourceImage);
                 break;
             case 'png':
-                $imageData = @imagecreatefrompng($sourceImage);
+                $imageData = imagecreatefrompng($sourceImage);
                 break;
             default:
                 break;
         }
 
-        if ($imageData) {
-            // creating responsive image
-
-            if ($forceWidth && $forceWidth < $imageSize[ 0 ]) {
-                // only resample if the image is larger than our target
-                $newWidth = $forceWidth;
-                $newHeight = (int) floor($forceWidth * $imageSize[ 1 ] / $imageSize[ 0 ]);
-
-                $newImage = imagecreatetruecolor($newWidth, $newHeight);
-                imagecopyresampled($newImage, $imageData, 0, 0, 0, 0, $newWidth, $newHeight, $imageSize[ 0 ], $imageSize[ 1 ]);
-
-                imagedestroy($imageData);
-                $imageData = $newImage;
-            }
-
-            LOG('Writing new image [' . $destinationImage . ']', 2, Log::DEBUG);
-
-            if ($formatConversion) {
-                imagepalettetotruecolor($imageData);
-                imageavif($imageData, $destinationImage, $this->avifQuality);
-            } else {
-                switch ($destExt) {
-                    case 'jpg':
-                    case 'jpeg':
-                        imagejpeg($imageData, $destinationImage, $this->jpegQuality);
-                        break;
-                    case 'gif':
-                        imagegif($imageData, $destinationImage);
-                        break;
-                    case 'webp':
-                        imagewebp($imageData, $destinationImage, $this->webpQuality);
-                        break;
-                    case 'png':
-                        imagepng($imageData, $destinationImage, $this->pngCompression);
-                        break;
-                    default:
-                        LOG('Unknown image format for writing [' . $destinationImage . ']', 2, Log::WARNING);
-                        break;
-                }
-            }
-
-            imagedestroy($imageData);
-            return true;
-        } else {
+        if (!$imageData) {
             LOG('Unable to load image [' . $sourceImage . ']', 2, Log::WARNING);
             return false;
         }
+
+        // creating responsive image
+        if ($imageSize && $forceWidth && $forceWidth < $imageSize[0]) {
+            // only resample if the image is larger than our target
+            $newWidth = $forceWidth;
+            $newHeight = (int) floor($forceWidth * $imageSize[1] / $imageSize[0]);
+
+            $newImage = imagecreatetruecolor($newWidth, $newHeight);
+            imagecopyresampled($newImage, $imageData, 0, 0, 0, 0, $newWidth, $newHeight, $imageSize[0], $imageSize[1]);
+
+            imagedestroy($imageData);
+            $imageData = $newImage;
+        }
+
+        LOG('Writing new image [' . $destinationImage . ']', 2, Log::DEBUG);
+
+        if ($formatConversion) {
+            imagepalettetotruecolor($imageData);
+            imageavif($imageData, $destinationImage, $this->avifQuality);
+        } else {
+            switch ($destExt) {
+                case 'jpg':
+                case 'jpeg':
+                    imagejpeg($imageData, $destinationImage, $this->jpegQuality);
+                    break;
+                case 'gif':
+                    imagegif($imageData, $destinationImage);
+                    break;
+                case 'webp':
+                    imagewebp($imageData, $destinationImage, $this->webpQuality);
+                    break;
+                case 'png':
+                    imagepng($imageData, $destinationImage, $this->pngCompression);
+                    break;
+                default:
+                    LOG('Unknown image format for writing [' . $destinationImage . ']', 2, Log::WARNING);
+                    break;
+            }
+        }
+
+        imagedestroy($imageData);
+        return true;
     }
 
-    private function _convertOrCopyImage($sourceImage, $destinationImage, $isPrimary = true, $forceWidth = false, $formatConversion = false)
+    private function _convertOrCopyImage(string $sourceImage, string $destinationImage, bool $isPrimary = true, int|false $forceWidth = false, bool $formatConversion = false): \stdClass|false
     {
         $imageExt = pathinfo($sourceImage, PATHINFO_EXTENSION);
         if ($formatConversion) {
@@ -189,13 +204,13 @@ class ImageProcessor
         }
     }
 
-    private function _isValidImage($imageFile)
+    private function _isValidImage(string $imageFile): bool
     {
-        $a = getimagesize($imageFile);
+        $a = $this->_getCachedImageSize($imageFile);
         if ($a) {
             $image_type = $a[2];
 
-            if (in_array($image_type, [ IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP  ])) {
+            if (in_array($image_type, [IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP])) {
                 return true;
             }
         }
@@ -203,7 +218,7 @@ class ImageProcessor
         return false;
     }
 
-    private function _isRemoteImage($imageFile)
+    private function _isRemoteImage(string $imageFile): bool
     {
         if (strpos($imageFile, 'http://') !== false || strpos($imageFile, 'https://') !== false) {
             return true;
@@ -212,7 +227,7 @@ class ImageProcessor
         return false;
     }
 
-    private function _getImageInformation($imageFile, $includeResp = true, $isRemote = false)
+    private function _getImageInformation(string $imageFile, bool $includeResp = true, bool $isRemote = false): \stdClass
     {
         $imageInfo = new \stdClass();
         $imageInfo->width = false;
@@ -241,10 +256,10 @@ class ImageProcessor
             $imageInfo->modificationTime = filemtime($imageFile);
             $imageInfo->size = filesize($imageFile);
 
-            $imageSize = getimagesize($imageFile);
+            $imageSize = $this->_getCachedImageSize($imageFile);
             if ($imageSize) {
-                $imageInfo->width = $imageSize[ 0 ];
-                $imageInfo->height = $imageSize[ 1 ];
+                $imageInfo->width = $imageSize[0];
+                $imageInfo->height = $imageSize[1];
             }
 
             $imageInfo->type = pathinfo($imageFile, PATHINFO_EXTENSION);
@@ -264,7 +279,10 @@ class ImageProcessor
         return $imageInfo;
     }
 
-    private function _findAndFixImage($content, $imageFile, $currentPath, $destinationPath, $publishDate, &$foundFile, $search_dirs = [ '', 'images/' ])
+    /**
+     * @param string[] $search_dirs
+     */
+    private function _findAndFixImage(Content $content, string $imageFile, string $currentPath, string $destinationPath, int $publishDate, string|false &$foundFile, array $search_dirs = ['', 'images/']): \stdClass|false
     {
         if ($this->_isRemoteImage($imageFile)) {
             LOG('........skipping remote image [' . $imageFile . ']', 3, Log::DEBUG);
@@ -272,7 +290,6 @@ class ImageProcessor
         }
 
         $foundFile = false;
-        $imageFound = false;
         $newLocation = false;
 
         foreach ($search_dirs as $search_dir) {
@@ -295,7 +312,7 @@ class ImageProcessor
                             $image = $this->_convertOrCopyImage($foundFile, $destinationFile, false, $size, $this->convertToWebp);
 
                             if ($image) {
-                                $mainImage->responsiveImages[ $size ] = $image;
+                                $mainImage->responsiveImages[$size] = $image;
                             }
                         }
 
@@ -309,7 +326,6 @@ class ImageProcessor
                 }
 
                 $newLocation = $mainImage;
-                $imageFound = true;
 
                 break;
             }

@@ -4,9 +4,11 @@ namespace CR;
 
 class LatteFileLoader extends \Latte\Loaders\FileLoader
 {
-    protected $templateDirs = [];
+    /** @var string[] */
+    protected array $templateDirs = [];
 
-    public function setDirectories($templateDirs)
+    /** @param string[] $templateDirs */
+    public function setDirectories(array $templateDirs): void
     {
         $this->templateDirs = $templateDirs;
     }

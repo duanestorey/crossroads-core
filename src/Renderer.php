@@ -16,16 +16,16 @@ class Renderer
     public const CONTENT = 2;
     public const AUTHOR = 3;
 
-    public $config = false;
-    public $templateEngine = false;
-    public $pluginManager = false;
-    public $menu = false;
-    public $theme = false;
-    public $startTime = false;
+    public Config $config;
+    public TemplateEngine $templateEngine;
+    public PluginManager $pluginManager;
+    public Menu $menu;
+    public Theme $theme;
+    public int $startTime;
 
-    protected $formatter = null;
+    protected ?Formatter $formatter = null;
 
-    public function __construct($config, $templateEngine, $pluginManager, $menu, $theme)
+    public function __construct(Config $config, TemplateEngine $templateEngine, PluginManager $pluginManager, Menu $menu, Theme $theme)
     {
         $this->config = $config;
         $this->templateEngine = $templateEngine;
@@ -40,7 +40,7 @@ class Renderer
         }
     }
 
-    public function renderSinglePage($entry, $templateFiles)
+    public function renderSinglePage(Content $entry, array $templateFiles): void
     {
         // set up page specific stuff like the page titel
         $params = $this->_getDefaultRenderParams($entry->relUrl, [ $entry->contentType, $entry->contentType . '-' . $entry->className ]);
@@ -88,7 +88,7 @@ class Renderer
         }
     }
 
-    public function renderIndexPage($entries, $contentType, $path, $templateFiles, $pageType, $pageTax = false, $pageTerm = false)
+    public function renderIndexPage(array $entries, string $contentType, string $path, array $templateFiles, int $pageType, string|false $pageTax = false, string|false $pageTerm = false): int
     {
         $totalPages = 0;
 
@@ -192,7 +192,7 @@ class Renderer
         return $totalPages;
     }
 
-    private function _getPaginationLinks($path, $totalPages)
+    private function _getPaginationLinks(string $path, int $totalPages): array
     {
         $links = [];
 
@@ -208,7 +208,7 @@ class Renderer
         return $links;
     }
 
-    private function _getDefaultRenderParams($currentPage, $bodyClasses = [])
+    private function _getDefaultRenderParams(string $currentPage, array $bodyClasses = []): \stdClass
     {
         $params = new \stdClass();
         $params->site = new \stdClass();

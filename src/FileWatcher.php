@@ -4,10 +4,15 @@ namespace CR;
 
 class FileWatcher
 {
-    protected $dirs = [];
-    protected $extensions = [];
-    protected $snapshot = [];
+    /** @var string[] */
+    protected array $dirs = [];
+    /** @var string[] */
+    protected array $extensions = [];
+    /** @var array<string, int> */
+    protected array $snapshot = [];
 
+    /** @param string[] $dirs
+     *  @param string[] $extensions */
     public function __construct(array $dirs, array $extensions = [])
     {
         $this->dirs = $dirs;
@@ -15,7 +20,8 @@ class FileWatcher
         $this->snapshot = $this->_scan();
     }
 
-    public function check()
+    /** @return list<array{type: string, path: string}> */
+    public function check(): array
     {
         $current = $this->_scan();
         $changes = [];
@@ -43,7 +49,8 @@ class FileWatcher
         return $changes;
     }
 
-    protected function _scan()
+    /** @return array<string, int> */
+    protected function _scan(): array
     {
         $files = [];
 
@@ -57,7 +64,8 @@ class FileWatcher
         return $files;
     }
 
-    protected function _scanDir($dir, &$files)
+    /** @param array<string, int> $files */
+    protected function _scanDir(string $dir, array &$files): void
     {
         $entries = @scandir($dir);
         if (!$entries) {
@@ -79,7 +87,7 @@ class FileWatcher
             } elseif (is_file($path)) {
                 $ext = pathinfo($path, PATHINFO_EXTENSION);
                 if (in_array($ext, $this->extensions)) {
-                    $files[ $path ] = filemtime($path);
+                    $files[ $path ] = (int) filemtime($path);
                 }
             }
         }

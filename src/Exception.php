@@ -4,21 +4,22 @@ namespace CR;
 
 class Exception extends \Exception
 {
-    public $name = null;
-    public $msg = null;
+    public string $name;
+    public string $msg;
 
-    public function __construct($name, $msg)
+    public function __construct(string $name, string $msg)
     {
+        parent::__construct($msg);
         $this->name = $name;
         $this->msg = $msg;
     }
 
-    public function name()
+    public function name(): string
     {
         return $this->name;
     }
 
-    public function msg()
+    public function msg(): string
     {
         return $this->msg;
     }

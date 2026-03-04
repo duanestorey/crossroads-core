@@ -4,14 +4,14 @@ namespace CR;
 
 class Markdown
 {
-    public $frontMatter = false;
-    public $markdown = false;
+    public array|false $frontMatter = false;
+    public string|false $markdown = false;
 
     public function __construct()
     {
     }
 
-    public function loadFile($filename)
+    public function loadFile(string $filename): bool
     {
         $contents = file_get_contents($filename);
 
@@ -30,28 +30,29 @@ class Markdown
         return ($contents !== false);
     }
 
-    public function frontMatter()
+    public function frontMatter(): array|false
     {
         return $this->frontMatter;
     }
 
-    public function rawMarkdown()
+    public function rawMarkdown(): string|false
     {
         return $this->markdown;
     }
 
-    public function strippedMarkdown()
+    public function strippedMarkdown(): string
     {
         return strip_tags($this->markdown);
     }
 
-    public function html()
+    public function html(): string
     {
         $parsedown = new \Parsedown();
         return $parsedown->text($this->markdown);
     }
 
-    private function _getfrontMatter(&$contents)
+    /** @return string[]|false */
+    private function _getfrontMatter(string &$contents): array|false
     {
         if (preg_match('/---(.*)---/iUs', $contents, $matches)) {
             return $matches;

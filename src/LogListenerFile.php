@@ -4,13 +4,14 @@ namespace CR;
 
 class LogListenerFile extends LogListener
 {
-    protected $currentLevel = Log::INFO;
-    protected $startTime = 0;
+    protected int $currentLevel = Log::INFO;
+    protected float $startTime = 0;
 
-    private $fileName = null;
-    private $fileHandle = null;
+    private string $fileName;
+    /** @var resource|null */
+    private mixed $fileHandle = null;
 
-    public function __construct($fileName)
+    public function __construct(string $fileName)
     {
         $this->fileName = $fileName;
         $this->startTime = microtime(true);
@@ -24,12 +25,12 @@ class LogListenerFile extends LogListener
         }
     }
 
-    public function setLevel($level)
+    public function setLevel(int $level): void
     {
         $this->currentLevel = $level;
     }
 
-    public function log($message, $tabs, $level)
+    public function log(string $message, int $tabs, int $level): void
     {
         if ($level < $this->currentLevel) {
             return;
@@ -62,7 +63,7 @@ class LogListenerFile extends LogListener
         fflush($this->fileHandle);
     }
 
-    private function getTabsAsSpaces($tabs)
+    private function getTabsAsSpaces(int $tabs): string
     {
         $spaces = '';
         for ($i = 0; $i < $tabs; $i++) {

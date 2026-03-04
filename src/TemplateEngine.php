@@ -4,13 +4,14 @@ namespace CR;
 
 class TemplateEngine
 {
-    public $latte = null;
-    public $templateDirs = '.';
-    public $config = null;
+    public ?\Latte\Engine $latte = null;
+    /** @var string[]|string */
+    public string|array $templateDirs = '.';
+    public Config $config;
 
-    protected $fileLoader = null;
+    protected ?LatteFileLoader $fileLoader = null;
 
-    public function __construct($config)
+    public function __construct(Config $config)
     {
         $this->config = $config;
 
@@ -22,14 +23,15 @@ class TemplateEngine
         $this->latte->setLoader($this->fileLoader);
     }
 
-    public function setTemplateDirs($templateDirs)
+    /** @param string[] $templateDirs */
+    public function setTemplateDirs(array $templateDirs): void
     {
         $this->templateDirs = $templateDirs;
 
         $this->fileLoader->setDirectories($templateDirs);
     }
 
-    public function templateExists($templateName)
+    public function templateExists(string $templateName): bool
     {
         foreach ($this->templateDirs as $dir) {
             if (file_exists($dir . '/' . $templateName . '.latte')) {
@@ -42,7 +44,8 @@ class TemplateEngine
         return false;
     }
 
-    public function locateTemplate($templates)
+    /** @param string|string[] $templates */
+    public function locateTemplate(string|array $templates): string|false
     {
         if (!is_array($templates)) {
             $templates = [ $templates ];
@@ -57,7 +60,7 @@ class TemplateEngine
         return false;
     }
 
-    public function render($templateFile, $params)
+    public function render(string $templateFile, \stdClass $params): string
     {
         if (!$this->latte) {
             LOG('Template engine not initialized', 1, Log::ERROR);

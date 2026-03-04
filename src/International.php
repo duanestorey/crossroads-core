@@ -4,14 +4,15 @@ namespace CR;
 
 class International
 {
-    private static $instance = null;
-    protected $strings = [];
+    private static ?International $instance = null;
+    /** @var array<string, mixed> */
+    protected array $strings = [];
 
     protected function __construct()
     {
     }
 
-    public static function instance()
+    public static function instance(): International
     {
         if (self::$instance == null) {
             self::$instance = new International();
@@ -20,7 +21,7 @@ class International
         return self::$instance;
     }
 
-    public function loadLocaleFile($file)
+    public function loadLocaleFile(string $file): void
     {
         $strings = YAML::parse_file($file, true);
 
@@ -31,7 +32,7 @@ class International
         }
     }
 
-    protected function getCallingFunction()
+    protected function getCallingFunction(): string
     {
         $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT);
         if ($trace) {
@@ -50,9 +51,11 @@ class International
 
             return $func;
         }
+
+        return '';
     }
 
-    public function get($name)
+    public function get(string $name): string
     {
         if (isset($this->strings[ $name ])) {
             return $this->strings[ $name ];
@@ -64,7 +67,7 @@ class International
     }
 }
 
-function _i18n($str)
+function _i18n(string $str): string
 {
     return International::instance()->get($str);
 }

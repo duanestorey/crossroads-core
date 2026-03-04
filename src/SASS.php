@@ -6,12 +6,12 @@ use ScssPhp\ScssPhp\Compiler;
 
 class SASS
 {
-    public static function isSassFile($filename)
+    public static function isSassFile(string $filename): bool
     {
         return ((strpos($filename, '.scss') !== false) || (strpos($filename, '.sass') !== false));
     }
 
-    public static function parseFile($filename)
+    public static function parseFile(string $filename): string|false
     {
         // makes no assumptions about the file
         $sass = false;

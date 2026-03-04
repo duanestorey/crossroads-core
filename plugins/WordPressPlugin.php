@@ -7,48 +7,49 @@
 
 namespace CR\Plugins;
 
+use CR\Config;
 use CR\Plugin;
 
 class WordPressPlugin extends Plugin
 {
-    public $config = null;
+    public Config $config;
 
-    public function __construct($config)
+    public function __construct(Config $config)
     {
         parent::__construct('wordpress');
 
         $this->config = $config;
     }
 
-    public function processOne($entry)
+    public function processOne(mixed $entry): mixed
     {
         $entry = $this->contentFilter($entry);
 
         return $entry;
     }
 
-    public function contentFilter($content)
+    public function contentFilter(mixed $content): mixed
     {
         // Remove stupid captions
         if (preg_match_all('#(\[caption\b[^\]]*\](.*)\[\/caption])#iU', $content->html, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $key => $match) {
-                $replace = str_replace('</a>', '</a><span class="caption text-center fst-italic">', $match[ 2 ] . '</span>');
+                $replace = str_replace('</a>', '</a><span class="caption text-center fst-italic">', $match[2] . '</span>');
                 $replace = str_replace('/>', '/><span class="caption text-center fst-italic">', $replace);
-                $content->html = str_replace($match[ 0 ], $replace, $content->html);
+                $content->html = str_replace($match[0], $replace, $content->html);
             }
         }
 
         // fix stray image closings
         if (preg_match_all('#<img(.*)/>#iU', $content->html, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $key => $match) {
-                $fixed_image = str_replace([ ' />', '/>' ], [ '>', '>' ], $match[ 0 ]);
-                $content->html = str_replace($match[ 0 ], $fixed_image, $content->html);
+                $fixed_image = str_replace([' />', '/>'], ['>', '>'], $match[0]);
+                $content->html = str_replace($match[0], $fixed_image, $content->html);
             }
         }
         return $content;
     }
 
-    public function templateParamFilter($params)
+    public function templateParamFilter(mixed $params): mixed
     {
         return $params;
     }

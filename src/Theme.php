@@ -9,57 +9,57 @@ namespace CR;
 
 class Theme
 {
-    protected $themeConfig = null;
-    protected $childThemeConfig = null;
+    protected ?Config $themeConfig = null;
+    protected ?Config $childThemeConfig = null;
 
-    protected $themeName = null;
-    protected $parentThemeName = null;
+    protected ?string $themeName = null;
+    protected ?string $parentThemeName = null;
 
-    protected $coreThemeDir = null;
-    protected $localThemeDir = null;
-    protected $isChildTheme = false;
-    protected $isLocalTheme = false;
+    protected ?string $coreThemeDir = null;
+    protected ?string $localThemeDir = null;
+    protected bool $isChildTheme = false;
+    protected bool $isLocalTheme = false;
 
-    protected $primaryThemeDir = false;
+    protected ?string $primaryThemeDir = null;
 
-    public function __construct($themeName, $coreThemeDir, $localThemeDir)
+    public function __construct(string $themeName, string $coreThemeDir, string $localThemeDir)
     {
         $this->themeName = $themeName;
         $this->coreThemeDir = $coreThemeDir;
         $this->localThemeDir = $localThemeDir;
     }
 
-    public function name()
+    public function name(): ?string
     {
         return $this->themeName;
     }
 
-    public function isChildTheme()
+    public function isChildTheme(): bool
     {
         return $this->isChildTheme;
     }
 
-    public function isLocalTheme()
+    public function isLocalTheme(): bool
     {
         return $this->isLocalTheme;
     }
 
-    public function getChildThemeName()
+    public function getChildThemeName(): ?string
     {
         return $this->themeName;
     }
 
-    public function getParentThemeName()
+    public function getParentThemeName(): ?string
     {
         return $this->parentThemeName;
     }
 
-    public function primaryThemeDir()
+    public function primaryThemeDir(): ?string
     {
         return $this->primaryThemeDir;
     }
 
-    public function load()
+    public function load(): bool
     {
         // check for local child theme
         if (file_exists($this->localThemeDir . '/'. $this->themeName . '/theme.yaml')) {
@@ -101,7 +101,7 @@ class Theme
         return false;
     }
 
-    public function getAssetHash()
+    public function getAssetHash(): string
     {
         $hashValue = 0;
 
@@ -111,10 +111,10 @@ class Theme
             }
         }
 
-        return md5($hashValue);
+        return md5((string) $hashValue);
     }
 
-    protected function accumulateAssets($contentSoFar, $actualFile)
+    protected function accumulateAssets(string $contentSoFar, string $actualFile): string
     {
         if (file_exists($actualFile)) {
             if (SASS::isSassFile($actualFile)) {
@@ -131,7 +131,7 @@ class Theme
         return $contentSoFar;
     }
 
-    public function processAssets()
+    public function processAssets(): void
     {
         foreach ($this->themeConfig->get('theme.assets', []) as $destName => $sources) {
             LOG(sprintf(_i18n('core.class.theme.processing'), $destName), 2, Log::INFO);
