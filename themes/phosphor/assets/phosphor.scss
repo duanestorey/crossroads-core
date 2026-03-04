@@ -465,6 +465,15 @@ main {
             color: var(--green);
         }
     }
+
+    .project-desc {
+        font-size: 0.79rem;
+        color: var(--text-dim);
+        opacity: 0.7;
+        line-height: 1.4;
+        margin-top: -0.1rem;
+        margin-bottom: 0.35rem;
+    }
 }
 
 // ----- Footer -----
@@ -533,9 +542,12 @@ main {
     opacity: 0.7;
 }
 
+.sidebar .nf {
+    font-size: 1em;
+}
+
 .sidebar-heading .nf {
     opacity: 0.5;
-    font-size: 1.3em;
 }
 
 .tag .nf {

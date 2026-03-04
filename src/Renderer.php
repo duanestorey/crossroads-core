@@ -218,6 +218,7 @@ class Renderer
         $params->site->charset = $this->config->get('site.charset', 'utf-8');
         $params->site->bio = $this->config->get('site.bio', '');
         $params->site->social = $this->config->get('site.social', []);
+        $params->site->projects = $this->config->get('site.projects', []);
 
         foreach ($this->menu->getAvailable() as $name) {
             $params->menu[ $name ] = $this->menu->build($name, $currentPage);

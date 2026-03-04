@@ -4,20 +4,26 @@
                         <p>{$site->bio}</p>
                     </div>
 
+                    {if count($site->projects)}
                     <div class="sidebar-section">
-                        <div class="sidebar-heading"><i class="nf nf-fa-folder"></i> // navigate</div>
+                        <div class="sidebar-heading"><i class="nf nf-fa-rocket"></i> // projects</div>
                         <ul class="sidebar-nav">
-                            {foreach $menu['main'] as $menu_item}
-                            <li><a href="{$menu_item->url}"{if $menu_item->isActive} class="active"{/if}>{$menu_item->name}</a></li>
+                            {foreach $site->projects as $name => $project}
+                            <li>
+                                <i class="nf {$project['icon'] ?? 'nf-fa-code'}"></i>
+                                {if isset($project['url'])}<a href="{$project['url']}">{$name}</a>{else}{$name}{/if}
+                                {if isset($project['description'])}<div class="project-desc">{$project['description']}</div>{/if}
+                            </li>
                             {/foreach}
                         </ul>
                     </div>
+                    {/if}
 
                     {if count($site->social)}
                     <div class="sidebar-section">
                         <div class="sidebar-heading"><i class="nf nf-fa-globe"></i> // elsewhere</div>
                         {var $socialIcons = [
-                            'github' => 'nf-dev-github',
+                            'github' => 'nf-fa-github',
                             'x' => 'nf-fa-twitter',
                             'twitter' => 'nf-fa-twitter',
                             'instagram' => 'nf-fa-instagram',
