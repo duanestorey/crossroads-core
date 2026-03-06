@@ -7,9 +7,17 @@
                     <ul class="entry-list">
                     {foreach $content as $item}
                         <li class="entry-item">
-                            <div class="entry-date">{$item->publishDate|date:'M j, Y'}</div>
+                            {if $item->featuredImageData}
+                            <a href="{$item->relUrl}" class="entry-thumb-link">
+                                <img src="{$item->featuredImageData->responsiveImages[320]->url ?? $item->featuredImageData->url}"
+                                     alt="" class="entry-thumb" loading="lazy">
+                            </a>
+                            {else}
+                            <div class="entry-spacer"></div>
+                            {/if}
                             <div class="entry-body">
                                 <div class="entry-title"><a href="{$item->relUrl}">{$item->title}</a></div>
+                                <div class="entry-date">{$item->publishDate|date:'M j, Y'}</div>
                                 <div class="entry-excerpt">{$item->excerpt()|noescape}</div>
                                 <a href="{$item->relUrl}" class="entry-read-more" title="{$item->title}" aria-label="Read more: {$item->title}"><i class="nf nf-fa-chevron_right"></i> read more<span class="sr-only">: {$item->title}</span></a>
                             </div>
