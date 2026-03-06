@@ -57,6 +57,10 @@ class SeoPlugin extends Plugin
             $meta[] = '<meta name="robots" content="' . implode(', ', $robotsDirectives) . '">';
         }
 
+        $feedUrl = $this->esc($this->config->get('site.url') . '/feed.xml');
+        $feedTitle = $this->esc($this->config->get('site.name'));
+        $meta[] = '<link rel="alternate" type="application/rss+xml" title="' . $feedTitle . '" href="' . $feedUrl . '">';
+
         $params->page->seoMeta = implode("\n", $meta);
 
         return $params;

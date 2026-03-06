@@ -173,6 +173,7 @@ class Builder
         $this->_writeRobots();
         $this->_writeSitemapXml();
         $this->_writeLlmsTxt();
+        $this->_writeRssFeed();
 
         LOG(sprintf(_i18n('core.build.total'), $this->entries->getEntryCount(), $this->totalPages), 0, Log::INFO);
 
@@ -348,6 +349,71 @@ class Builder
         file_put_contents(CROSSROADS_PUBLIC_DIR . '/llms.txt', $llms);
 
         LOG(sprintf(_i18n('core.build.writing'), 'llms.txt'), 1, Log::INFO);
+    }
+
+    private function _writeRssFeed(): void
+    {
+        $siteUrl = rtrim($this->config->get('site.url'), '/');
+        $siteName = $this->config->get('site.name');
+        $siteDescription = $this->config->get('site.description', '');
+        $siteLang = $this->config->get('site.lang', 'en');
+        $homeType = $this->config->get('site.home', 'posts');
+
+        $entries = $this->entries->get($homeType);
+        if (!$entries) {
+            return;
+        }
+
+        usort($entries, 'CR\cr_sort');
+
+        // Filter out drafts and take up to 20
+        $feedEntries = [];
+        foreach ($entries as $entry) {
+            if ($entry->isDraft) {
+                continue;
+            }
+            $feedEntries[] = $entry;
+            if (count($feedEntries) >= 20) {
+                break;
+            }
+        }
+
+        if (empty($feedEntries)) {
+            return;
+        }
+
+        $lastBuildDate = date('r', $feedEntries[0]->publishDate);
+        $feedUrl = htmlspecialchars($siteUrl . '/feed.xml', ENT_XML1, 'UTF-8');
+
+        $rss  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        $rss .= '<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"';
+        $rss .= " xmlns:atom=\"http://www.w3.org/2005/Atom\">\n";
+        $rss .= "  <channel>\n";
+        $rss .= '    <title>' . htmlspecialchars($siteName, ENT_XML1, 'UTF-8') . "</title>\n";
+        $rss .= '    <link>' . htmlspecialchars($siteUrl, ENT_XML1, 'UTF-8') . "</link>\n";
+        $rss .= '    <description>' . htmlspecialchars($siteDescription, ENT_XML1, 'UTF-8') . "</description>\n";
+        $rss .= '    <language>' . htmlspecialchars($siteLang, ENT_XML1, 'UTF-8') . "</language>\n";
+        $rss .= '    <lastBuildDate>' . $lastBuildDate . "</lastBuildDate>\n";
+        $rss .= '    <atom:link href="' . $feedUrl . "\" rel=\"self\" type=\"application/rss+xml\"/>\n";
+
+        foreach ($feedEntries as $entry) {
+            $itemUrl = htmlspecialchars($entry->url, ENT_XML1, 'UTF-8');
+            $rss .= "    <item>\n";
+            $rss .= '      <title>' . htmlspecialchars($entry->title, ENT_XML1, 'UTF-8') . "</title>\n";
+            $rss .= '      <link>' . $itemUrl . "</link>\n";
+            $rss .= '      <guid isPermaLink="true">' . $itemUrl . "</guid>\n";
+            $rss .= '      <pubDate>' . date('r', $entry->publishDate) . "</pubDate>\n";
+            $rss .= '      <description>' . htmlspecialchars($entry->excerpt(300), ENT_XML1, 'UTF-8') . "</description>\n";
+            $rss .= '      <content:encoded><![CDATA[' . $entry->html . "]]></content:encoded>\n";
+            $rss .= "    </item>\n";
+        }
+
+        $rss .= "  </channel>\n";
+        $rss .= "</rss>\n";
+
+        file_put_contents(CROSSROADS_PUBLIC_DIR . '/feed.xml', $rss);
+
+        LOG(sprintf(_i18n('core.build.writing'), 'feed.xml'), 1, Log::INFO);
     }
 
     private function _setupMenus(): void
