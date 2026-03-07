@@ -89,7 +89,7 @@ class Utils
         }
 
         if ($configured > 1) {
-            return min($configured, 8);
+            return min($configured, 16);
         }
 
         // Auto-detect CPU count
@@ -106,7 +106,7 @@ class Utils
             }
         }
 
-        return max(2, min($cpuCount ?: 4, 8));
+        return max(2, min($cpuCount ?: 4, 16));
     }
 
     /** @return string[] */

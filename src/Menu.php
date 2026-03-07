@@ -7,6 +7,11 @@ class Menu
     public array $menuData = [];
     public ?string $menuFile = null;
 
+    /** @var array<string, list<\stdClass>> Cached base menu items (without isActive) */
+    private array $menuCache = [];
+    /** @var array<string, string[]> Cached fixPath URLs per menu */
+    private array $menuUrlCache = [];
+
     public function __construct()
     {
         $this->menuFile = \CROSSROADS_CONFIG_DIR . '/menus.yaml';
@@ -50,22 +55,36 @@ class Menu
     /** @return list<\stdClass>|false */
     public function build(string $menuName, string $currentPage): array|false
     {
-        $menuData = false;
-        if (isset($this->menuData[ $menuName ])) {
-            $menuData = [];
+        if (!isset($this->menuData[$menuName])) {
+            return false;
+        }
 
-            foreach ($this->menuData[ $menuName ] as $pageName => $pageSlug) {
+        // Build and cache base menu items on first call
+        if (!isset($this->menuCache[$menuName])) {
+            $this->menuCache[$menuName] = [];
+            $this->menuUrlCache[$menuName] = [];
+
+            foreach ($this->menuData[$menuName] as $pageName => $pageSlug) {
                 $menuItem = new \stdClass();
                 $menuItem->name = $pageName;
                 $menuItem->url = $pageSlug;
                 $menuItem->isActive = false;
 
-                if (Utils::fixPath($currentPage) == Utils::fixPath($pageSlug)) {
-                    $menuItem->isActive = true;
-                }
-
-                $menuData[] = $menuItem;
+                $this->menuCache[$menuName][] = $menuItem;
+                $this->menuUrlCache[$menuName][] = Utils::fixPath($pageSlug);
             }
+        }
+
+        // Clone cached items and set isActive via pre-computed URLs
+        $fixedCurrentPage = Utils::fixPath($currentPage);
+        $menuData = [];
+
+        foreach ($this->menuCache[$menuName] as $i => $baseItem) {
+            $item = clone $baseItem;
+            if ($fixedCurrentPage === $this->menuUrlCache[$menuName][$i]) {
+                $item->isActive = true;
+            }
+            $menuData[] = $item;
         }
 
         return $menuData;

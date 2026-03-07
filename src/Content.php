@@ -48,6 +48,9 @@ class Content
     public array $imageInfo = [];
     public string $contentPath = '';
 
+    /** @var array<string, string>|null Cached result of discoverImages() */
+    private ?array $discoveredImagesCache = null;
+
     public function __construct(Config $config, string $contentType, ?array $contentConfig)
     {
         $this->config = $config;
@@ -94,6 +97,10 @@ class Content
      */
     public function discoverImages(): array
     {
+        if ($this->discoveredImagesCache !== null) {
+            return $this->discoveredImagesCache;
+        }
+
         $allImages = [];
 
         $regexp = '(<img[^>]+src=(?:\"|\')\K(.[^">]+?)(?=\"|\'))';
@@ -104,6 +111,7 @@ class Content
             }
         }
 
+        $this->discoveredImagesCache = $allImages;
         return $allImages;
     }
 

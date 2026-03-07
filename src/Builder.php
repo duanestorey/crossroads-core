@@ -106,9 +106,6 @@ class Builder
         foreach ($this->config->get('content', []) as $contentType => $contentConfig) {
             $entries = $this->entries->get($contentType);
 
-            // process all content
-            usort($entries, 'CR\cr_sort');
-
             if (isset($contentConfig['index']) && $contentConfig['index']) {
                 LOG(sprintf(_i18n('core.build.generating.index'), $contentType), 1, Log::INFO);
 
@@ -150,8 +147,6 @@ class Builder
                         LOG(sprintf(_i18n('core.build.generating.tax'), $contentType . '/' . $term), 2, Log::DEBUG);
 
                         $entries = $this->entries->getTax($contentType, $taxType, $term);
-
-                        usort($entries, 'CR\cr_sort');
 
                         if (count($entries)) {
                             $this->totalPages += $this->renderer->renderIndexPage(
@@ -257,8 +252,6 @@ class Builder
         foreach ($this->config->get('content', []) as $contentType => $contentConfig) {
             $entries = $this->entries->get($contentType);
 
-            usort($entries, 'CR\cr_sort');
-
             foreach ($entries as $entry) {
                 if ($entry->isDraft) {
                     continue;
@@ -320,8 +313,6 @@ class Builder
                 continue;
             }
 
-            usort($entries, 'CR\cr_sort');
-
             $llms .= "\n## " . ucwords($contentType) . "\n\n";
 
             $limit = ($contentType === $this->config->get('site.home')) ? 50 : 0;
@@ -363,8 +354,6 @@ class Builder
         if (!$entries) {
             return;
         }
-
-        usort($entries, 'CR\cr_sort');
 
         // Filter out drafts and take up to 20
         $feedEntries = [];

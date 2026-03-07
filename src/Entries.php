@@ -162,6 +162,19 @@ class Entries
                 $this->entries[$contentType][] = $content;
                 $this->totalEntries++;
             }
+
+            // Sort entries once after loading; callers can rely on sorted order
+            usort($this->entries[$contentType], 'CR\cr_sort');
+
+            // Sort taxonomy term entries too
+            if (isset($this->tax[$contentType])) {
+                foreach ($this->tax[$contentType] as &$terms) {
+                    foreach ($terms as &$termEntries) {
+                        usort($termEntries, 'CR\cr_sort');
+                    }
+                }
+                unset($terms, $termEntries);
+            }
         }
     }
 
@@ -263,6 +276,19 @@ class Entries
             }
 
             $this->entries[$contentType] = $this->pluginManager->processAll($this->entries[$contentType]);
+
+            // Sort entries once after loading; callers can rely on sorted order
+            usort($this->entries[$contentType], 'CR\cr_sort');
+
+            // Sort taxonomy term entries too
+            if (isset($this->tax[$contentType])) {
+                foreach ($this->tax[$contentType] as &$terms) {
+                    foreach ($terms as &$termEntries) {
+                        usort($termEntries, 'CR\cr_sort');
+                    }
+                }
+                unset($terms, $termEntries);
+            }
         }
 
         // Process all images (parallel if possible)

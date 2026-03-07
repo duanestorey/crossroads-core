@@ -19,8 +19,12 @@ class Config
             return $this->config[$key];
         } else {
             if ($default === self::NO_DEFAULT) {
-                $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
-                LOG(sprintf('Setting not found [%s] in [%s:%d]', $key, $trace['file'], $trace['line']), 1, Log::WARNING);
+                if ($this->config && !empty($this->config['options.debug'])) {
+                    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+                    LOG(sprintf('Setting not found [%s] in [%s:%d]', $key, $trace['file'], $trace['line']), 1, Log::WARNING);
+                } else {
+                    LOG(sprintf('Setting not found [%s]', $key), 1, Log::WARNING);
+                }
                 return null;
             }
 
