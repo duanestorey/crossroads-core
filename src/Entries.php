@@ -131,12 +131,12 @@ class Entries
                     $draftFile = CROSSROADS_PUBLIC_DIR . $content->relUrl;
                     if (file_exists($draftFile)) {
                         unlink($draftFile);
-                        if (file_exists($draftFile . '.md')) {
-                            unlink($draftFile . '.md');
+                        if (file_exists(Builder::mdPath($draftFile))) {
+                            unlink(Builder::mdPath($draftFile));
                         }
                         LOG(sprintf(_i18n('core.class.entries.removing_draft'), $content->slug), 2, Log::INFO);
-                    } elseif (file_exists($draftFile . '.md')) {
-                        unlink($draftFile . '.md');
+                    } elseif (file_exists(Builder::mdPath($draftFile))) {
+                        unlink(Builder::mdPath($draftFile));
                     }
                     LOG(sprintf(_i18n('core.class.entries.skipping_draft'), $content->slug), 2, Log::INFO);
                     continue;
@@ -243,12 +243,12 @@ class Entries
                             $draftFile = CROSSROADS_PUBLIC_DIR . $content->relUrl;
                             if (file_exists($draftFile)) {
                                 unlink($draftFile);
-                                if (file_exists($draftFile . '.md')) {
-                                    unlink($draftFile . '.md');
+                                if (file_exists(Builder::mdPath($draftFile))) {
+                                    unlink(Builder::mdPath($draftFile));
                                 }
                                 LOG(sprintf(_i18n('core.class.entries.removing_draft'), $content->slug), 2, Log::INFO);
-                            } elseif (file_exists($draftFile . '.md')) {
-                                unlink($draftFile . '.md');
+                            } elseif (file_exists(Builder::mdPath($draftFile))) {
+                                unlink(Builder::mdPath($draftFile));
                             }
                             LOG(sprintf(_i18n('core.class.entries.skipping_draft'), $content->slug), 2, Log::INFO);
                             continue;

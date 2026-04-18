@@ -169,6 +169,7 @@ class Builder
         $this->_writeSitemapXml();
         $this->_writeLlmsTxt();
         $this->_writeRssFeed();
+        $this->_writeHeaders();
 
         LOG(sprintf(_i18n('core.build.total'), $this->entries->getEntryCount(), $this->totalPages), 0, Log::INFO);
 
@@ -294,11 +295,35 @@ class Builder
 
     private function _writeRobots(): void
     {
-        // write robots
-        $robots = "user-agent: *\ndisallow: /assets/css/\ndisallow: /assets/js/\nallow: /\n\nUser-agent: Twitterbot\nallow: /\nSitemap: " . $this->config->get('site.url') . '/sitemap.xml';
+        $signals = $this->config->get('site.content_signals', 'ai-train=no, search=yes, ai-input=yes');
+        $sitemapUrl = $this->config->get('site.url') . '/sitemap.xml';
+
+        $robots  = "user-agent: *\n";
+        $robots .= 'Content-Signal: ' . $signals . "\n";
+        $robots .= "disallow: /assets/css/\n";
+        $robots .= "disallow: /assets/js/\n";
+        $robots .= "allow: /\n\n";
+        $robots .= "User-agent: Twitterbot\n";
+        $robots .= 'Content-Signal: ' . $signals . "\n";
+        $robots .= "allow: /\n";
+        $robots .= 'Sitemap: ' . $sitemapUrl;
+
         file_put_contents(CROSSROADS_PUBLIC_DIR . '/robots.txt', $robots);
 
         LOG(sprintf(_i18n('core.build.writing'), 'robots.txt'), 1, Log::INFO);
+    }
+
+    private function _writeHeaders(): void
+    {
+        $headers  = "# Link headers for AI agent discovery (RFC 8288)\n";
+        $headers .= "/*\n";
+        $headers .= "  Link: </sitemap.xml>; rel=\"sitemap\"\n";
+        $headers .= "  Link: </feed.xml>; rel=\"alternate\"; type=\"application/rss+xml\"\n";
+        $headers .= "  Link: </llms.txt>; rel=\"describedby\"\n";
+
+        file_put_contents(CROSSROADS_PUBLIC_DIR . '/_headers', $headers);
+
+        LOG(sprintf(_i18n('core.build.writing'), '_headers'), 1, Log::INFO);
     }
 
     private function _writeLlmsTxt(): void
@@ -323,7 +348,7 @@ class Builder
                     continue;
                 }
 
-                $mdUrl = $entry->url . '.md';
+                $mdUrl = self::mdPath($entry->url);
                 $desc = '';
                 if ($entry->description) {
                     $desc = ': ' . self::sanitizeDescription($entry->description);
@@ -428,6 +453,11 @@ class Builder
         LOG(_i18n('core.theme.loaded'), 2, Log::INFO);
 
         $this->theme->processAssets();
+    }
+
+    public static function mdPath(string $htmlPath): string
+    {
+        return preg_replace('/\.html$/', '.md', $htmlPath);
     }
 
     public static function sanitizeDescription(string $description): string

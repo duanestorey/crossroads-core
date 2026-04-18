@@ -81,7 +81,7 @@ class Renderer
             // Write markdown version for LLM consumption (llms.txt companion)
             if ($entry->markdownData) {
                 $mdContent = '# ' . $entry->title . "\n\n" . $entry->markdownData;
-                file_put_contents(CROSSROADS_PUBLIC_DIR . $params->content->relUrl . '.md', $mdContent);
+                file_put_contents(CROSSROADS_PUBLIC_DIR . Builder::mdPath($params->content->relUrl), $mdContent);
             }
 
             LOG(sprintf(_i18n('core.class.renderer.output'), CROSSROADS_PUBLIC_DIR . $params->content->relUrl), 4, Log::DEBUG);
@@ -178,6 +178,7 @@ class Renderer
                 }
 
                 file_put_contents($filename, $renderedHtml);
+                file_put_contents(Builder::mdPath($filename), $this->_buildListingMarkdown($params));
 
                 LOG(sprintf(_i18n('core.class.renderer.output'), CROSSROADS_PUBLIC_SLUG . $pagination->curPageLink), 3, Log::DEBUG);
 
@@ -190,6 +191,28 @@ class Renderer
         }
 
         return $totalPages;
+    }
+
+    /**
+     * @param \stdClass $params Template render params (content is an array of Content entries)
+     */
+    private function _buildListingMarkdown(\stdClass $params): string
+    {
+        $md = '# ' . $params->page->title . "\n\n";
+
+        if (!empty($params->page->description)) {
+            $md .= '> ' . $params->page->description . "\n\n";
+        }
+
+        foreach ($params->content as $entry) {
+            $desc = '';
+            if (!empty($entry->description)) {
+                $desc = ': ' . Builder::sanitizeDescription($entry->description);
+            }
+            $md .= '- [' . $entry->title . '](' . Builder::mdPath($entry->url) . ')' . $desc . "\n";
+        }
+
+        return $md;
     }
 
     private function _getPaginationLinks(string $path, int $totalPages): array

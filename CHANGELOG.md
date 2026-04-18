@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+- `Builder::_writeHeaders()` generates a Cloudflare Pages `_headers` file with RFC 8288 Link headers on `/*` advertising `sitemap`, `alternate` (RSS feed), and `describedby` (llms.txt) for AI agent discovery
+- `Renderer::_buildListingMarkdown()` emits `.md` companions for home, paginated index, content-index, and taxonomy pages — previously only single-content pages had markdown twins, leaving list pages with no response when agents request `text/markdown`
+- `Builder::mdPath()` helper for deriving the markdown companion path from an HTML URL
+- `Content-Signal` directive in `robots.txt` (`_writeRobots()`), configurable via `site.content_signals` with default `ai-train=no, search=yes, ai-input=yes`
+
+### Changed
+- Markdown companion filenames switched from `foo.html.md` to `foo.md` — cleaner URLs, matches the Jekyll/Hugo convention, simplifies Cloudflare Transform Rule expressions for content negotiation
+
 ## [1.6.0] - 2026-03-04
 
 ### Fixed
